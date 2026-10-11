@@ -1,0 +1,42 @@
+[
+  {
+    "test": "C01 two overlapping bookings",
+    "isolation": "READ COMMITTED",
+    "first": "committed",
+    "second": "23P01",
+    "invariant": "PASS",
+    "detail": "ERROR:  23P01: conflicting key value violates exclusion constraint \"ex_booking_overlap\"\nDETAIL:  Key (equipment_id, (period::tstzrange))=(2, [\"2026-11-20 00:00:00+03\",\"2026-11-20 01:00:00+03\")) conflicts with existing key (equipment_id, (period::tstzrange))=(2, [\"2026-11-20 00:00:00+03\",\"2026-11-20 01:00:00+03\")).\nCONTEXT:  SQL statement \"INSERT INTO booking(user_id,equipment_id,capability_id,period,purpose)\n VALUES(p_user,p_equipment,p_capability,tstzrange(p_start,p_end,'[)'),p_purpose) RETURNING id\"\nPL/pgSQL function create_booking(bigint,bigint,bigint,timestamp with time zone,timestamp with time zone,text) line 6 at SQL statement\nSCHEMA NAME:  labreserve\nTABLE NAME:  booking\nCONSTRAINT NAME:  ex_booking_overlap\nLOCATION:  check_exclusion_or_unique_constraint, execIndexing.c:928"
+  },
+  {
+    "test": "C02 outage then booking",
+    "isolation": "READ COMMITTED",
+    "first": "committed",
+    "second": "23514",
+    "invariant": "PASS",
+    "detail": "ERROR:  23514: Maintenance or fault overlap\nCONTEXT:  PL/pgSQL function check_booking() line 32 at RAISE\nSQL statement \"INSERT INTO booking(user_id,equipment_id,capability_id,period,purpose)\n VALUES(p_user,p_equipment,p_capability,tstzrange(p_start,p_end,'[)'),p_purpose) RETURNING id\"\nPL/pgSQL function create_booking(bigint,bigint,bigint,timestamp with time zone,timestamp with time zone,text) line 6 at SQL statement\nLOCATION:  exec_stmt_raise, pl_exec.c:3909"
+  },
+  {
+    "test": "C03 booking then outage",
+    "isolation": "READ COMMITTED",
+    "first": "committed",
+    "second": "ok",
+    "invariant": "PASS",
+    "detail": ""
+  },
+  {
+    "test": "C04 direct INSERTs",
+    "isolation": "READ COMMITTED",
+    "first": "committed",
+    "second": "23P01",
+    "invariant": "PASS",
+    "detail": "ERROR:  23P01: conflicting key value violates exclusion constraint \"ex_booking_overlap\"\nDETAIL:  Key (equipment_id, (period::tstzrange))=(2, [\"2026-11-20 09:00:00+03\",\"2026-11-20 10:00:00+03\")) conflicts with existing key (equipment_id, (period::tstzrange))=(2, [\"2026-11-20 09:00:00+03\",\"2026-11-20 10:00:00+03\")).\nSCHEMA NAME:  labreserve\nTABLE NAME:  booking\nCONSTRAINT NAME:  ex_booking_overlap\nLOCATION:  check_exclusion_or_unique_constraint, execIndexing.c:928"
+  },
+  {
+    "test": "C05 stale RR snapshot",
+    "isolation": "REPEATABLE READ",
+    "first": "committed",
+    "second": "40001",
+    "invariant": "PASS",
+    "detail": "ERROR:  40001: could not serialize access due to concurrent update\nCONTEXT:  SQL statement \"UPDATE equipment SET schedule_revision=schedule_revision+1 WHERE id=p_id\"\nPL/pgSQL function lock_equipment(bigint) line 3 at SQL statement\nSQL statement \"SELECT lock_equipment(NEW.equipment_id)\"\nPL/pgSQL function check_booking() line 17 at PERFORM\nSQL statement \"INSERT INTO booking(user_id,equipment_id,capability_id,period,purpose)\n VALUES(p_user,p_equipment,p_capability,tstzrange(p_start,p_end,'[)'),p_purpose) RETURNING id\"\nPL/pgSQL function create_booking(bigint,bigint,bigint,timestamp with time zone,timestamp with time zone,text) line 6 at SQL statement\nLOCATION:  ExecUpdate, nodeModifyTable.c:2602"
+  }
+]

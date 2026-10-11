@@ -1,0 +1,22 @@
+\begin{singlespace}\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.32\textwidth}>{\raggedright\arraybackslash}p{0.6\textwidth}}
+\toprule Таблица & Назначение\\\midrule\endfirsthead
+\toprule Таблица & Назначение\\\midrule\endhead
+app\_\allowbreak{}user & Учётная запись человека; активность и профиль \\
+app\_\allowbreak{}role & Три внешние роли предметной области \\
+user\_\allowbreak{}role & Назначение ролей пользователям (M:N) \\
+equipment\_\allowbreak{}type & Тип оборудования и архивирование \\
+capability & Справочник требуемых функций \\
+type\_\allowbreak{}capability & Поддерживаемые типом функции (M:N) \\
+equipment & Инвентарная единица, характеристики, архив \\
+admission & Допуск к типу; период, основание, автор и отзыв \\
+booking & Плановый интервал, владелец, цель и жизненный цикл \\
+alternative & Историческое предложение переноса и выбор \\
+fault\_\allowbreak{}report & Первичное сообщение и результат проверки \\
+unavailability & Период ТО либо подтверждённой неисправности \\
+repair & Исполнитель и результат технической работы \\
+use\_\allowbreak{}session & Фактические начало и окончание работы \\
+notification & Внутрисистемное уведомление и прочтение \\
+audit\_\allowbreak{}event & Неизменяемый журнал значимых изменений \\
+conflict\_\allowbreak{}event & Отклонённый запрос для статистики конфликтов \\
+\bottomrule\end{longtable}\end{singlespace}

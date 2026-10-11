@@ -1,0 +1,14 @@
+SET search_path=labreserve,public;
+CREATE INDEX ix_equipment_type_active ON equipment(type_id,id) WHERE NOT archived;
+CREATE INDEX ix_type_capability_reverse ON type_capability(capability_id,type_id);
+CREATE INDEX ix_admission_valid ON admission USING gist(user_id,type_id,(valid_during::tstzrange)) WHERE revoked_at IS NULL;
+CREATE INDEX ix_booking_user_future ON booking(user_id,lower(period)) WHERE status IN ('confirmed','needs_transfer');
+CREATE INDEX ix_booking_equipment_period ON booking USING gist(equipment_id,(period::tstzrange));
+CREATE INDEX ix_unavailability_period ON unavailability USING gist(equipment_id,(period::tstzrange)) WHERE status<>'cancelled';
+CREATE INDEX ix_alternative_booking_rank ON alternative(booking_id,priority,lower(period)) WHERE state='offered';
+CREATE INDEX ix_fault_equipment_time ON fault_report(equipment_id,reported_at DESC);
+CREATE INDEX ix_repair_unavailability ON repair(unavailability_id,lower(period) DESC);
+CREATE INDEX ix_audit_record_time ON audit_event(table_name,((record_key->>'id')),occurred_at DESC);
+CREATE INDEX ix_notification_unread ON notification(user_id,created_at) WHERE read_at IS NULL;
+CREATE UNIQUE INDEX ux_notification_reminder ON notification(booking_id,kind) WHERE kind='reminder';
+CREATE INDEX ix_conflict_equipment_time ON conflict_event(equipment_id,occurred_at);

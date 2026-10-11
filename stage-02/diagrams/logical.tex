@@ -1,0 +1,152 @@
+\documentclass[a4paper,landscape,10pt]{article}
+\usepackage{fontspec}\usepackage[russian]{babel}\setmainfont{DejaVu Sans}
+\usepackage[margin=1cm]{geometry}\usepackage{tikz}
+\usetikzlibrary{arrows.meta}\pagestyle{empty}\setlength{\parindent}{0pt}
+\tikzset{tbl/.style={draw,fill=blue!5,text width=5.4cm,align=left,font=\fontsize{8}{11}\selectfont,inner sep=7pt},fk/.style={-Latex,thick},lab/.style={fill=white,font=\scriptsize,inner sep=2pt}}
+\begin{document}
+
+\begin{center}\Large Даталогическая модель: каталог и допуски\end{center}
+PK — первичный ключ; FK — внешний ключ; NN — NOT NULL. Стрелка направлена от FK к родителю. Все FK: RESTRICT / RESTRICT.
+\begin{center}\begin{tikzpicture}
+\node[tbl] (app_user) at (0.0,0.0) {\textbf{app\_\allowbreak{}user}\\\hrulefill\\
+id : bigint PK,NN\\
+login : text NN\\
+full\_\allowbreak{}name : text NN\\
+password\_\allowbreak{}hash : text \\
+active : bool NN\\
+created\_\allowbreak{}at : timestamptz NN\\};
+\node[tbl] (app_role) at (6.6,0.0) {\textbf{app\_\allowbreak{}role}\\\hrulefill\\
+code : text PK,NN\\};
+\node[tbl] (equipment_type) at (13.2,0.0) {\textbf{equipment\_\allowbreak{}type}\\\hrulefill\\
+id : bigint PK,NN\\
+name : text NN\\
+archived : bool NN\\};
+\node[tbl] (capability) at (19.799999999999997,0.0) {\textbf{capability}\\\hrulefill\\
+id : bigint PK,NN\\
+name : text NN\\};
+\node[tbl] (user_role) at (0.0,-7.6) {\textbf{user\_\allowbreak{}role}\\\hrulefill\\
+user\_\allowbreak{}id : bigint PK,FK,NN\\
+role\_\allowbreak{}code : text PK,FK,NN\\};
+\node[tbl] (equipment) at (6.6,-7.6) {\textbf{equipment}\\\hrulefill\\
+id : bigint PK,NN\\
+type\_\allowbreak{}id : bigint FK,NN\\
+inventory\_\allowbreak{}no : text NN\\
+name : text NN\\
+characteristics : jsonb NN\\
+archived : bool NN\\
+schedule\_\allowbreak{}revision : bigint NN\\};
+\node[tbl] (type_capability) at (13.2,-7.6) {\textbf{type\_\allowbreak{}capability}\\\hrulefill\\
+type\_\allowbreak{}id : bigint PK,FK,NN\\
+capability\_\allowbreak{}id : bigint PK,FK,NN\\};
+\node[tbl] (admission) at (19.799999999999997,-7.6) {\textbf{admission}\\\hrulefill\\
+id : bigint PK,NN\\
+user\_\allowbreak{}id : bigint FK,NN\\
+type\_\allowbreak{}id : bigint FK,NN\\
+valid\_\allowbreak{}during : tstzrange NN\\
+basis : text NN\\
+granted\_\allowbreak{}by : bigint FK,NN\\
+revoked\_\allowbreak{}at : timestamptz \\
+created\_\allowbreak{}at : timestamptz NN\\};
+\draw[fk] (user_role) -- (app_user);
+\draw[fk] (user_role) -- (app_role);
+\draw[fk] (type_capability) -- (equipment_type);
+\draw[fk] (type_capability) -- (capability);
+\draw[fk] (equipment) -- (equipment_type);
+\draw[fk] (admission) -- (app_user);
+\draw[fk] (admission) -- (equipment_type);
+\draw[fk] (admission) -- (app_user);
+\end{tikzpicture}\end{center}
+\small Все FK листа (включая внешние): user\_\allowbreak{}role.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak user\_\allowbreak{}role.role\_\allowbreak{}code → app\_\allowbreak{}role.id; \allowbreak type\_\allowbreak{}capability.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak type\_\allowbreak{}capability.capability\_\allowbreak{}id → capability.id; \allowbreak equipment.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak admission.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak admission.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak admission.granted\_\allowbreak{}by → app\_\allowbreak{}user.id.
+\newpage
+\begin{center}\Large Даталогическая модель: бронирование и использование\end{center}
+PK — первичный ключ; FK — внешний ключ; NN — NOT NULL. Стрелка направлена от FK к родителю. Все FK: RESTRICT / RESTRICT.
+\begin{center}\begin{tikzpicture}
+\node[tbl] (booking) at (6.6,0) {\textbf{booking}\\\hrulefill\\
+id : bigint PK,NN\\
+user\_\allowbreak{}id : bigint FK,NN\\
+equipment\_\allowbreak{}id : bigint FK,NN\\
+capability\_\allowbreak{}id : bigint FK,NN\\
+period : tstzrange NN\\
+purpose : text NN\\
+status : text NN\\
+cancelled\_\allowbreak{}at : timestamptz \\
+cancel\_\allowbreak{}reason : text \\
+created\_\allowbreak{}at : timestamptz NN\\};
+\node[tbl] (alternative) at (0,-7.6) {\textbf{alternative}\\\hrulefill\\
+id : bigint PK,NN\\
+booking\_\allowbreak{}id : bigint FK,NN\\
+equipment\_\allowbreak{}id : bigint FK,NN\\
+period : tstzrange NN\\
+priority : smallint NN\\
+state : text NN\\
+created\_\allowbreak{}at : timestamptz NN\\};
+\node[tbl] (use_session) at (6.6,-7.6) {\textbf{use\_\allowbreak{}session}\\\hrulefill\\
+id : bigint PK,NN\\
+booking\_\allowbreak{}id : bigint FK,NN\\
+started\_\allowbreak{}at : timestamptz NN\\
+ended\_\allowbreak{}at : timestamptz \\
+close\_\allowbreak{}comment : text \\};
+\node[tbl] (notification) at (13.2,-7.6) {\textbf{notification}\\\hrulefill\\
+id : bigint PK,NN\\
+user\_\allowbreak{}id : bigint FK,NN\\
+booking\_\allowbreak{}id : bigint FK\\
+kind : text NN\\
+message : text NN\\
+created\_\allowbreak{}at : timestamptz NN\\
+read\_\allowbreak{}at : timestamptz \\};
+\node[tbl] (conflict_event) at (19.8,0) {\textbf{conflict\_\allowbreak{}event}\\\hrulefill\\
+id : bigint PK,NN\\
+user\_\allowbreak{}id : bigint FK,NN\\
+equipment\_\allowbreak{}id : bigint FK,NN\\
+requested\_\allowbreak{}period : tstzrange NN\\
+error\_\allowbreak{}code : text NN\\
+occurred\_\allowbreak{}at : timestamptz NN\\};
+\draw[fk] (alternative) -- (booking);
+\draw[fk] (use_session) -- (booking);
+\draw[fk] (notification) -- (booking);
+\end{tikzpicture}\end{center}
+\small Все FK листа (включая внешние): booking.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak booking.equipment\_\allowbreak{}id → equipment.id; \allowbreak booking.capability\_\allowbreak{}id → capability.id; \allowbreak alternative.booking\_\allowbreak{}id → booking.id; \allowbreak alternative.equipment\_\allowbreak{}id → equipment.id; \allowbreak use\_\allowbreak{}session.booking\_\allowbreak{}id → booking.id; \allowbreak notification.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak notification.booking\_\allowbreak{}id → booking.id; \allowbreak conflict\_\allowbreak{}event.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak conflict\_\allowbreak{}event.equipment\_\allowbreak{}id → equipment.id.
+\newpage
+\begin{center}\Large Даталогическая модель: технические работы и аудит\end{center}
+PK — первичный ключ; FK — внешний ключ; NN — NOT NULL. Стрелка направлена от FK к родителю. Все FK: RESTRICT / RESTRICT.
+\begin{center}\begin{tikzpicture}
+\node[tbl] (fault_report) at (0,0) {\textbf{fault\_\allowbreak{}report}\\\hrulefill\\
+id : bigint PK,NN\\
+equipment\_\allowbreak{}id : bigint FK,NN\\
+reported\_\allowbreak{}by : bigint FK,NN\\
+description : text NN\\
+reported\_\allowbreak{}at : timestamptz NN\\
+state : text NN\\};
+\node[tbl] (unavailability) at (6.6,-7.6) {\textbf{unavailability}\\\hrulefill\\
+id : bigint PK,NN\\
+equipment\_\allowbreak{}id : bigint FK,NN\\
+kind : text NN\\
+period : tstzrange NN\\
+reason : text NN\\
+fault\_\allowbreak{}report\_\allowbreak{}id : bigint FK\\
+created\_\allowbreak{}by : bigint FK,NN\\
+status : text NN\\
+resolved\_\allowbreak{}by : bigint FK\\
+resolved\_\allowbreak{}at : timestamptz \\
+created\_\allowbreak{}at : timestamptz NN\\};
+\node[tbl] (repair) at (13.2,0) {\textbf{repair}\\\hrulefill\\
+id : bigint PK,NN\\
+unavailability\_\allowbreak{}id : bigint FK,NN\\
+performed\_\allowbreak{}by : bigint FK,NN\\
+period : tstzrange NN\\
+result : text NN\\};
+\node[tbl] (audit_event) at (19.8,0) {\textbf{audit\_\allowbreak{}event}\\\hrulefill\\
+id : bigint PK,NN\\
+actor\_\allowbreak{}id : bigint FK\\
+table\_\allowbreak{}name : text NN\\
+record\_\allowbreak{}key : jsonb NN\\
+action : text NN\\
+old\_\allowbreak{}data : jsonb \\
+new\_\allowbreak{}data : jsonb \\
+occurred\_\allowbreak{}at : timestamptz NN\\
+transaction\_\allowbreak{}id : bigint NN\\};
+\draw[fk] (unavailability) -- (fault_report);
+\draw[fk] (repair) -- (unavailability);
+\end{tikzpicture}\end{center}
+\small Все FK листа (включая внешние): fault\_\allowbreak{}report.equipment\_\allowbreak{}id → equipment.id; \allowbreak fault\_\allowbreak{}report.reported\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak unavailability.equipment\_\allowbreak{}id → equipment.id; \allowbreak unavailability.fault\_\allowbreak{}report\_\allowbreak{}id → fault\_\allowbreak{}report.id; \allowbreak unavailability.created\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak unavailability.resolved\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak repair.unavailability\_\allowbreak{}id → unavailability.id; \allowbreak repair.performed\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak audit\_\allowbreak{}event.actor\_\allowbreak{}id → app\_\allowbreak{}user.id.
+\end{document}

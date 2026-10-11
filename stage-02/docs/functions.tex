@@ -1,0 +1,171 @@
+\subsection{free\_\allowbreak{}intervals}
+Максимальные свободные диапазоны в конечном окне; можно исключить переносимую бронь.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}equipment bigint,p\_\allowbreak{}window tstzrange,p\_\allowbreak{}ignore bigint DEFAULT NULL.
+\item Выход: SETOF tstzrange.
+\item Ошибки: 22023: некорректное окно.
+\item Гарантии: Предварительный снимок; объединение броней и технических периодов.
+\item Трассировка: UC-01; FR-05,10; BR-2,3,10; T42.
+\end{itemize}
+\subsection{equivalent\_\allowbreak{}equipment}
+Свободные единицы с требуемой функцией и допуском на весь интервал.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}user bigint,p\_\allowbreak{}capability bigint,p\_\allowbreak{}period tstzrange.
+\item Выход: SETOF equipment.
+\item Ошибки: Пустое множество при отсутствии вариантов.
+\item Гарантии: Не резервирует найденные слоты.
+\item Трассировка: UC-01; FR-11; BR-1,5; T40.
+\end{itemize}
+\subsection{find\_\allowbreak{}alternatives}
+До 12 вариантов в горизонте; пересекает свободные интервалы со сроками допусков.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}user bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}capability bigint,  p\_\allowbreak{}period tstzrange,p\_\allowbreak{}horizon interval DEFAULT interval '30 days',p\_\allowbreak{}ignore bigint DEFAULT NULL.
+\item Выход: equipment\_\allowbreak{}id, period, priority.
+\item Ошибки: 22023: неверный диапазон или горизонт.
+\item Гарантии: Сортировка BR-6: 1,2,3; затем время и id.
+\item Трассировка: UC-01/\allowbreak{}02; FR-10–12; BR-5,6; T13,19,26,28,46.
+\end{itemize}
+\subsection{offer\_\allowbreak{}alternatives}
+Сохраняет предложения к существующей брони; прежние предложения устаревают.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}booking bigint,p\_\allowbreak{}horizon interval DEFAULT interval '30 days'.
+\item Выход: integer: число предложений.
+\item Ошибки: P0002: бронь отсутствует.
+\item Гарантии: Выбор пользователя не имитируется; предложения не занимают слот.
+\item Трассировка: UC-01/\allowbreak{}02; FR-12,15,17; BR-7; T13,20.
+\end{itemize}
+\subsection{create\_\allowbreak{}booking}
+Подтверждает будущую бронь; p\_\allowbreak{}user — удостоверенный пользователь.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}user bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}capability bigint,  p\_\allowbreak{}start timestamptz,p\_\allowbreak{}end timestamptz,p\_\allowbreak{}purpose text.
+\item Выход: bigint: id брони.
+\item Ошибки: 23514: допуск/\allowbreak{}архив/\allowbreak{}недоступность; 23P01: пересечение; 22000: обратный диапазон.
+\item Гарантии: Атомарный INSERT, триггер и EXCLUDE.
+\item Трассировка: UC-01; FR-06–08; BR-1–4; T01–09; C01,C04.
+\end{itemize}
+\subsection{request\_\allowbreak{}booking}
+Обёртка создания: сохраняет причину отклонения без исключения для ожидаемого конфликта.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}user bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}capability bigint,  p\_\allowbreak{}start timestamptz,p\_\allowbreak{}end timestamptz,p\_\allowbreak{}purpose text.
+\item Выход: booking\_\allowbreak{}id либо error\_\allowbreak{}code.
+\item Ошибки: Ожидаемые 23514/\allowbreak{}23P01 возвращаются; прочие исключения передаются выше.
+\item Гарантии: Запись отказа сохранится только при COMMIT внешней транзакции.
+\item Трассировка: UC-01/\allowbreak{}03; FR-08,22; T38.
+\end{itemize}
+\subsection{cancel\_\allowbreak{}booking}
+Владелец либо администратор отменяет будущую активную бронь с причиной.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}booking bigint,p\_\allowbreak{}reason text.
+\item Выход: void.
+\item Ошибки: 42501: чужая бронь; 23514: прошлая/\allowbreak{}терминальная бронь или существующий сеанс.
+\item Гарантии: Отмена и уведомление атомарны; история сохраняется.
+\item Трассировка: UC-01; FR-09,21; BR-8; T06,07,11.
+\end{itemize}
+\subsection{select\_\allowbreak{}alternative}
+Владелец либо администратор подтверждает сохранённое предложение.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}alternative bigint.
+\item Выход: void.
+\item Ошибки: 23514: устаревший вариант; 23P01: конкурентная бронь; 42501: нет прав.
+\item Гарантии: Блокировка обеих единиц; повторная проверка допуска, функции и календаря.
+\item Трассировка: UC-01/\allowbreak{}02; FR-13; BR-5–7; T16–18,44.
+\end{itemize}
+\subsection{report\_\allowbreak{}fault}
+Активный человек сообщает о неисправности без автоматического изменения доступности.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}description text.
+\item Выход: bigint: id сообщения.
+\item Ошибки: 42501: неактивный автор; 23503: нет оборудования.
+\item Гарантии: Сохраняется сообщение и аудит.
+\item Трассировка: UC-02; FR-16; T21.
+\end{itemize}
+\subsection{register\_\allowbreak{}unavailability}
+Техник либо администратор регистрирует ТО или подтверждает поломку. NULL p\_\allowbreak{}end — неизвестный конец поломки.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}kind text,  p\_\allowbreak{}start timestamptz,p\_\allowbreak{}end timestamptz,p\_\allowbreak{}reason text,p\_\allowbreak{}report bigint DEFAULT NULL.
+\item Выход: bigint: id периода.
+\item Ошибки: 42501: роль; 23514: несоответствие сообщения/\allowbreak{}периода; 23503: ссылки.
+\item Гарантии: Период, маркировка будущих броней, варианты и уведомления в одной транзакции.
+\item Трассировка: UC-02; FR-14–17; BR-3,7; T12–15,22–25; C02,C03,C05.
+\end{itemize}
+\subsection{edit\_\allowbreak{}maintenance}
+Изменение периода и причины активного ТО либо его отмена.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}unavailability bigint,p\_\allowbreak{}start timestamptz,  p\_\allowbreak{}end timestamptz,p\_\allowbreak{}reason text,p\_\allowbreak{}cancel boolean DEFAULT false.
+\item Выход: void.
+\item Ошибки: 23514: неактивное ТО/\allowbreak{}иная причина; 42501: роль.
+\item Гарантии: Новые затронутые брони маркируются; отмена не подтверждает их сама.
+\item Трассировка: UC-02; FR-14,15; BR-7,8; T20.
+\end{itemize}
+\subsection{equipment\_\allowbreak{}state}
+Состояние на момент p\_\allowbreak{}at: archived, fault, maintenance, available.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}equipment bigint,p\_\allowbreak{}at timestamptz DEFAULT clock\_\allowbreak{}timestamp().
+\item Выход: text.
+\item Ошибки: NULL при неизвестной единице.
+\item Гарантии: Единый вычисляемый источник состояния по всем причинам.
+\item Трассировка: UC-02/\allowbreak{}03; FR-03; T22,27,29.
+\end{itemize}
+\subsection{resolve\_\allowbreak{}unavailability}
+Техник либо администратор записывает результат и закрывает активную причину.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}unavailability bigint,p\_\allowbreak{}result text.
+\item Выход: text: итоговое состояние.
+\item Ошибки: 23514: причина уже закрыта/\allowbreak{}ещё не началась; 42501: роль.
+\item Гарантии: История ремонта; остальные причины продолжают блокировать.
+\item Трассировка: UC-02; FR-18; BR-3,8; T27,29.
+\end{itemize}
+\subsection{open\_\allowbreak{}session}
+Владелец либо администратор открывает фактическую работу в плановом интервале.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}booking bigint.
+\item Выход: bigint: id сеанса.
+\item Ошибки: 23514: бронь/\allowbreak{}допуск/\allowbreak{}время/\allowbreak{}доступность; 23505: сеанс уже есть.
+\item Гарантии: Один сеанс; блокировка оборудования и проверка начала.
+\item Трассировка: UC-01; FR-19,20; BR-9; T10,30,31.
+\end{itemize}
+\subsection{close\_\allowbreak{}session}
+Закрывает работу. p\_\allowbreak{}comment обязателен при действии администратора за владельца.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}session bigint,p\_\allowbreak{}comment text DEFAULT NULL.
+\item Выход: void.
+\item Ошибки: 23514: повторное закрытие/\allowbreak{}нет комментария; 42501: нет прав.
+\item Гарантии: Фактический конец, комментарий и completed сохраняются атомарно.
+\item Трассировка: UC-01; FR-19,20; BR-8,9; T32–34,52,53,57.
+\end{itemize}
+\subsection{create\_\allowbreak{}reminders}
+Создаёт напоминания о будущих подтверждённых бронях до p\_\allowbreak{}until; запускается планировщиком.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}until timestamptz.
+\item Выход: integer: число новых уведомлений.
+\item Ошибки: Нет ожидаемых бизнес-ошибок.
+\item Гарантии: Частичный UNIQUE и ON CONFLICT: идемпотентность.
+\item Трассировка: UC-01; FR-21; T43.
+\end{itemize}
+\subsection{equipment\_\allowbreak{}metrics}
+Плановая и фактическая загрузка, объединённый простой, процент утилизации и число отказов за окно.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}window tstzrange.
+\item Выход: equipment\_\allowbreak{}id, planned\_\allowbreak{}seconds, actual\_\allowbreak{}seconds, downtime\_\allowbreak{}seconds, utilization\_\allowbreak{}percent, conflicts.
+\item Ошибки: 22023: окно не конечное/\allowbreak{}пустое.
+\item Гарантии: Сначала union диапазонов, затем пересечение с окном; без двойного счёта.
+\item Трассировка: UC-03; FR-22,23; T39,56,57.
+\end{itemize}
+\subsection{grant\_\allowbreak{}admission}
+Администратор назначает допуск с основанием и сроком.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}user bigint,p\_\allowbreak{}type bigint,p\_\allowbreak{}start timestamptz,  p\_\allowbreak{}end timestamptz,p\_\allowbreak{}basis text.
+\item Выход: bigint: id допуска.
+\item Ошибки: 42501: нет роли admin; 23514: интервал; 23503: ссылки.
+\item Гарантии: Допуск и аудит сохраняются в транзакции.
+\item Трассировка: UC-03; FR-04; BR-1; T45–48.
+\end{itemize}
+\subsection{revoke\_\allowbreak{}admission}
+Администратор отзывает допуск без удаления истории.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}admission bigint.
+\item Выход: void.
+\item Ошибки: 42501: роль; 23514: уже отозван/\allowbreak{}не найден.
+\item Гарантии: При повторном подтверждении и начале работы отзыв учитывается.
+\item Трассировка: UC-03; FR-04; BR-1,8; T49,50.
+\end{itemize}

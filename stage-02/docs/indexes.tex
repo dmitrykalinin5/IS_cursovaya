@@ -1,0 +1,18 @@
+\begin{singlespace}\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.3\textwidth}>{\raggedright\arraybackslash}p{0.31\textwidth}>{\raggedright\arraybackslash}p{0.31\textwidth}}
+\toprule Индекс и тип & Ожидаемый запрос & Цена и ограничения\\\midrule\endfirsthead
+\toprule Индекс и тип & Ожидаемый запрос & Цена и ограничения\\\midrule\endhead
+ix\_\allowbreak{}equipment\_\allowbreak{}type\_\allowbreak{}active; B-tree, частичный & Фильтр активного каталога по типу; компактнее полного индекса. & Архивирование меняет состав; для всех строк не используется. \\
+ix\_\allowbreak{}type\_\allowbreak{}capability\_\allowbreak{}reverse; B-tree, составной & Поиск типов по функции; PK начинается с type\_\allowbreak{}id. & Дополнительная запись при изменении M:N. \\
+ix\_\allowbreak{}admission\_\allowbreak{}valid; GiST, частичный & Пользователь, тип и покрытие временного диапазона. & GiST дороже B-tree; отзыв обновляет индекс; на 12 строках Seq Scan дешевле. \\
+ix\_\allowbreak{}booking\_\allowbreak{}user\_\allowbreak{}future; B-tree, частичный & Календарь владельца, нижняя граница и LIMIT по времени. & Предикат по статусу, не по now(); завершение удаляет индексную запись. \\
+ix\_\allowbreak{}booking\_\allowbreak{}equipment\_\allowbreak{}period; GiST, полный & Историческая аналитика и периоды всех статусов. & Для confirmed дублирует часть возможностей EXCLUDE, но нужен для истории. \\
+ix\_\allowbreak{}unavailability\_\allowbreak{}period; GiST, частичный & Пересечение ТО/\allowbreak{}поломок с запросом и состояние на момент времени. & Цена записи диапазонов; исключает только отменённые причины, включает resolved. \\
+ix\_\allowbreak{}alternative\_\allowbreak{}booking\_\allowbreak{}rank; B-tree, частичный & Список предложений по броне, приоритету и времени. & После выбора требуется менять индексный состав; варианты не резервируют время. \\
+ix\_\allowbreak{}fault\_\allowbreak{}equipment\_\allowbreak{}time; B-tree, составной & Последние сообщения по оборудованию. & Занимает память; ускорение не измерено на малом журнале. \\
+ix\_\allowbreak{}repair\_\allowbreak{}unavailability; B-tree, составной & История работ по причине недоступности. & Дополнительная стоимость append-only вставки. \\
+ix\_\allowbreak{}audit\_\allowbreak{}record\_\allowbreak{}time; B-tree, выражение & История объекта по имени таблицы, id и времени. & JSONB ключ вычисляется на вставке; для связующих пар id NULL, нужен иной запрос. \\
+ix\_\allowbreak{}notification\_\allowbreak{}unread; B-tree, частичный & Непрочитанные уведомления владельца. & Прочтение удаляет индексную запись. \\
+ux\_\allowbreak{}notification\_\allowbreak{}reminder; B-tree, UNIQUE, частичный & Идемпотентный запуск планировщика. & Одна запись reminder на бронь; после переноса повторная политика требует уточнения. \\
+ix\_\allowbreak{}conflict\_\allowbreak{}equipment\_\allowbreak{}time; B-tree, составной & Отказы по оборудованию и времени события. & Статистика отражает только API request\_\allowbreak{}booking. \\
+\bottomrule\end{longtable}\end{singlespace}

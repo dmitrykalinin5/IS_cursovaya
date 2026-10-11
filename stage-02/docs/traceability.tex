@@ -1,0 +1,42 @@
+\begin{singlespace}\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.1\textwidth}>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}>{\raggedright\arraybackslash}p{0.3\textwidth}}
+\toprule Код & Объекты & Операция & Проверка\\\midrule\endfirsthead
+\toprule Код & Объекты & Операция & Проверка\\\midrule\endhead
+UC-01 & booking, admission, alternative, use\_\allowbreak{}session & create/\allowbreak{}select/\allowbreak{}open/\allowbreak{}close & T01–11,16–19,30–34,44,52–53; C01,C04 \\
+UC-02 & unavailability, fault\_\allowbreak{}report, repair, notification & register/\allowbreak{}edit/\allowbreak{}resolve; impact & T12–29; C02,C03,C05 \\
+UC-03 & catalogue, admission, audit, conflict & grant/\allowbreak{}revoke; metrics & T35–40,45–50,56; Q3–Q5 \\
+FR-01 & app\_\allowbreak{}user, user\_\allowbreak{}role & assert\_\allowbreak{}owner, require\_\allowbreak{}staff & T11,25,45,58–60; аутентификация — этап 3 \\
+FR-02 & equipment\_\allowbreak{}type, equipment, type\_\allowbreak{}capability & DDL, audit\_\allowbreak{}change & seed; интерфейс администратора — этап 3 \\
+FR-03 & equipment, unavailability & equipment\_\allowbreak{}state & T22,27,29 \\
+FR-04 & admission & grant/\allowbreak{}revoke\_\allowbreak{}admission & T45–50 \\
+FR-05 & equipment, booking, unavailability & free\_\allowbreak{}intervals & T42; Q1–Q3 \\
+FR-06 & booking, capability & create\_\allowbreak{}booking & T01,09 \\
+FR-07 & admission, booking, unavailability & check\_\allowbreak{}booking & T02–04,15,24,47–49 \\
+FR-08 & booking, equipment & create\_\allowbreak{}booking; EXCLUDE & C01,C04,C05 \\
+FR-09 & booking, notification & cancel\_\allowbreak{}booking & T06,07,11 \\
+FR-10 & booking, unavailability & free\_\allowbreak{}intervals, find\_\allowbreak{}alternatives & T42,46 \\
+FR-11 & type\_\allowbreak{}capability, admission & equivalent\_\allowbreak{}equipment & T40 \\
+FR-12 & alternative & find/\allowbreak{}offer\_\allowbreak{}alternatives & T13,19,26,28 \\
+FR-13 & booking, alternative & select\_\allowbreak{}alternative & T16–18,44 \\
+FR-14 & unavailability & register/\allowbreak{}edit\_\allowbreak{}maintenance & T12,20 \\
+FR-15 & booking, alternative & impact\_\allowbreak{}bookings & T12–15 \\
+FR-16 & fault\_\allowbreak{}report, unavailability & report\_\allowbreak{}fault, register\_\allowbreak{}unavailability & T21–25 \\
+FR-17 & alternative, notification & impact\_\allowbreak{}bookings & T23,26,28 \\
+FR-18 & repair, unavailability & resolve\_\allowbreak{}unavailability & T27,29 \\
+FR-19 & use\_\allowbreak{}session, booking & open/\allowbreak{}close\_\allowbreak{}session & T30–34,52,53 \\
+FR-20 & booking, use\_\allowbreak{}session & equipment\_\allowbreak{}metrics & T57 \\
+FR-21 & notification & cancel/\allowbreak{}select/\allowbreak{}impact/\allowbreak{}reminders & T14,43 \\
+FR-22 & booking, use\_\allowbreak{}session, conflict\_\allowbreak{}event & equipment\_\allowbreak{}metrics & T38,39,56 \\
+FR-23 & equipment\_\allowbreak{}metrics result & export\_\allowbreak{}report.sql & CSV выполнен; UI-фильтры — этап 3/\allowbreak{}4 \\
+FR-24 & audit\_\allowbreak{}event & audit\_\allowbreak{}change; audit\_\allowbreak{}immutable & T35,36 \\
+BR-1 & admission, app\_\allowbreak{}user & check\_\allowbreak{}booking; grant/\allowbreak{}revoke & T02,03,47–49 \\
+BR-2 & ex\_\allowbreak{}booking\_\allowbreak{}overlap & EXCLUDE + lock\_\allowbreak{}equipment & T04,05; C01,C04 \\
+BR-3 & unavailability & booking\_\allowbreak{}guard; impact & T15,24,27; C02,C03 \\
+BR-4 & time\_\allowbreak{}window & CHECK + диапазон & T08,54 \\
+BR-5 & type\_\allowbreak{}capability & equivalent/\allowbreak{}find; check\_\allowbreak{}booking & T09,40 \\
+BR-6 & alternative.priority & find\_\allowbreak{}alternatives & T19 \\
+BR-7 & booking.status & impact; select\_\allowbreak{}alternative & T12,20,23 \\
+BR-8 & audit, booking, admission & history guards & T07,34–36,41,50,51 \\
+BR-9 & use\_\allowbreak{}session & session guards; open/\allowbreak{}close & T10,30–33,52,53 \\
+BR-10 & timestamptz, tstzrange & time\_\allowbreak{}window; TZ отображения & T05,37 \\
+\bottomrule\end{longtable}\end{singlespace}

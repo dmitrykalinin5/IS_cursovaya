@@ -1,0 +1,304 @@
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{app\_\allowbreak{}user}
+Учётная запись человека; активность и профиль.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+login & text & нет & — \\
+full\_\allowbreak{}name & text & нет & — \\
+password\_\allowbreak{}hash & text & да & — \\
+active & boolean & нет & true \\
+created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((length(TRIM(BOTH FROM login)) > 0)).
+\item PRIMARY KEY (id).
+\item UNIQUE (login).
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{app\_\allowbreak{}role}
+Три внешние роли предметной области.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+code & text & нет & — \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((code = ANY (ARRAY['user'::text, 'admin'::text, 'technician'::text]))).
+\item PRIMARY KEY (code).
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{user\_\allowbreak{}role}
+Назначение ролей пользователям (M:N).\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+user\_\allowbreak{}id & bigint & нет & — \\
+role\_\allowbreak{}code & text & нет & — \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item PRIMARY KEY (user\_\allowbreak{}id, role\_\allowbreak{}code).
+\item FOREIGN KEY (user\_\allowbreak{}id) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (role\_\allowbreak{}code) REFERENCES labreserve.app\_\allowbreak{}role(code) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{equipment\_\allowbreak{}type}
+Тип оборудования и архивирование.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+name & text & нет & — \\
+archived & boolean & нет & false \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item PRIMARY KEY (id).
+\item UNIQUE (name).
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{capability}
+Справочник требуемых функций.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+name & text & нет & — \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item PRIMARY KEY (id).
+\item UNIQUE (name).
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{type\_\allowbreak{}capability}
+Поддерживаемые типом функции (M:N).\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+type\_\allowbreak{}id & bigint & нет & — \\
+capability\_\allowbreak{}id & bigint & нет & — \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item PRIMARY KEY (type\_\allowbreak{}id, capability\_\allowbreak{}id).
+\item FOREIGN KEY (type\_\allowbreak{}id) REFERENCES labreserve.equipment\_\allowbreak{}type(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (capability\_\allowbreak{}id) REFERENCES labreserve.capability(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{equipment}
+Инвентарная единица, характеристики, архив.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+type\_\allowbreak{}id & bigint & нет & — \\
+inventory\_\allowbreak{}no & text & нет & — \\
+name & text & нет & — \\
+characteristics & jsonb & нет & '\{\}'::jsonb \\
+archived & boolean & нет & false \\
+schedule\_\allowbreak{}revision & bigint & нет & 0 \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((jsonb\_\allowbreak{}typeof(characteristics) = 'object'::text)).
+\item PRIMARY KEY (id).
+\item UNIQUE (inventory\_\allowbreak{}no).
+\item FOREIGN KEY (type\_\allowbreak{}id) REFERENCES labreserve.equipment\_\allowbreak{}type(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{admission}
+Допуск к типу; период, основание, автор и отзыв.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+user\_\allowbreak{}id & bigint & нет & — \\
+type\_\allowbreak{}id & bigint & нет & — \\
+valid\_\allowbreak{}during & time\_\allowbreak{}window & нет & — \\
+basis & text & нет & — \\
+granted\_\allowbreak{}by & bigint & нет & — \\
+revoked\_\allowbreak{}at & timestamptz & да & — \\
+created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item PRIMARY KEY (id).
+\item FOREIGN KEY (user\_\allowbreak{}id) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (type\_\allowbreak{}id) REFERENCES labreserve.equipment\_\allowbreak{}type(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (granted\_\allowbreak{}by) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{booking}
+Плановый интервал, владелец, цель и жизненный цикл.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+user\_\allowbreak{}id & bigint & нет & — \\
+equipment\_\allowbreak{}id & bigint & нет & — \\
+capability\_\allowbreak{}id & bigint & нет & — \\
+period & time\_\allowbreak{}window & нет & — \\
+purpose & text & нет & — \\
+status & text & нет & 'confirmed'::text \\
+cancelled\_\allowbreak{}at & timestamptz & да & — \\
+cancel\_\allowbreak{}reason & text & да & — \\
+created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((NOT upper\_\allowbreak{}inf((period)::tstzrange))).
+\item CHECK ((status = ANY (ARRAY['confirmed'::text, 'needs\_\allowbreak{}transfer'::text, 'cancelled'::text, 'completed'::text]))).
+\item CHECK (((status = 'cancelled'::text) = ((cancelled\_\allowbreak{}at IS NOT NULL) AND (cancel\_\allowbreak{}reason IS NOT NULL)))).
+\item PRIMARY KEY (id).
+\item EXCLUDE USING gist (equipment\_\allowbreak{}id WITH =, ((period)::tstzrange) WITH \&\&) WHERE ((status = 'confirmed'::text)).
+\item FOREIGN KEY (user\_\allowbreak{}id) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (equipment\_\allowbreak{}id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (capability\_\allowbreak{}id) REFERENCES labreserve.capability(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{alternative}
+Историческое предложение переноса и выбор.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+booking\_\allowbreak{}id & bigint & нет & — \\
+equipment\_\allowbreak{}id & bigint & нет & — \\
+period & time\_\allowbreak{}window & нет & — \\
+priority & smallint & нет & — \\
+state & text & нет & 'offered'::text \\
+created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((NOT upper\_\allowbreak{}inf((period)::tstzrange))).
+\item CHECK (((priority >= 1) AND (priority <= 3))).
+\item CHECK ((state = ANY (ARRAY['offered'::text, 'chosen'::text, 'obsolete'::text]))).
+\item PRIMARY KEY (id).
+\item UNIQUE (booking\_\allowbreak{}id, equipment\_\allowbreak{}id, period).
+\item FOREIGN KEY (booking\_\allowbreak{}id) REFERENCES labreserve.booking(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (equipment\_\allowbreak{}id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{fault\_\allowbreak{}report}
+Первичное сообщение и результат проверки.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+equipment\_\allowbreak{}id & bigint & нет & — \\
+reported\_\allowbreak{}by & bigint & нет & — \\
+description & text & нет & — \\
+reported\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+state & text & нет & 'reported'::text \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((state = ANY (ARRAY['reported'::text, 'confirmed'::text, 'dismissed'::text]))).
+\item PRIMARY KEY (id).
+\item FOREIGN KEY (equipment\_\allowbreak{}id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (reported\_\allowbreak{}by) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{unavailability}
+Период ТО либо подтверждённой неисправности.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+equipment\_\allowbreak{}id & bigint & нет & — \\
+kind & text & нет & — \\
+period & time\_\allowbreak{}window & нет & — \\
+reason & text & нет & — \\
+fault\_\allowbreak{}report\_\allowbreak{}id & bigint & да & — \\
+created\_\allowbreak{}by & bigint & нет & — \\
+status & text & нет & 'active'::text \\
+resolved\_\allowbreak{}by & bigint & да & — \\
+resolved\_\allowbreak{}at & timestamptz & да & — \\
+created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((kind = ANY (ARRAY['maintenance'::text, 'fault'::text]))).
+\item CHECK ((status = ANY (ARRAY['active'::text, 'resolved'::text, 'cancelled'::text]))).
+\item CHECK (((kind = 'fault'::text) = (fault\_\allowbreak{}report\_\allowbreak{}id IS NOT NULL))).
+\item CHECK (((kind <> 'maintenance'::text) OR (NOT upper\_\allowbreak{}inf((period)::tstzrange)))).
+\item CHECK (((status = 'resolved'::text) = ((resolved\_\allowbreak{}by IS NOT NULL) AND (resolved\_\allowbreak{}at IS NOT NULL)))).
+\item PRIMARY KEY (id).
+\item UNIQUE (fault\_\allowbreak{}report\_\allowbreak{}id).
+\item FOREIGN KEY (equipment\_\allowbreak{}id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (fault\_\allowbreak{}report\_\allowbreak{}id) REFERENCES labreserve.fault\_\allowbreak{}report(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (created\_\allowbreak{}by) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (resolved\_\allowbreak{}by) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{repair}
+Исполнитель и результат технической работы.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+unavailability\_\allowbreak{}id & bigint & нет & — \\
+performed\_\allowbreak{}by & bigint & нет & — \\
+period & time\_\allowbreak{}window & нет & — \\
+result & text & нет & — \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((NOT upper\_\allowbreak{}inf((period)::tstzrange))).
+\item PRIMARY KEY (id).
+\item FOREIGN KEY (unavailability\_\allowbreak{}id) REFERENCES labreserve.unavailability(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (performed\_\allowbreak{}by) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{use\_\allowbreak{}session}
+Фактические начало и окончание работы.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+booking\_\allowbreak{}id & bigint & нет & — \\
+started\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+ended\_\allowbreak{}at & timestamptz & да & — \\
+close\_\allowbreak{}comment & text & да & — \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK (((ended\_\allowbreak{}at IS NULL) OR (ended\_\allowbreak{}at > started\_\allowbreak{}at))).
+\item PRIMARY KEY (id).
+\item UNIQUE (booking\_\allowbreak{}id).
+\item FOREIGN KEY (booking\_\allowbreak{}id) REFERENCES labreserve.booking(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{notification}
+Внутрисистемное уведомление и прочтение.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+user\_\allowbreak{}id & bigint & нет & — \\
+booking\_\allowbreak{}id & bigint & да & — \\
+kind & text & нет & — \\
+message & text & нет & — \\
+created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+read\_\allowbreak{}at & timestamptz & да & — \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((kind = ANY (ARRAY['transfer\_\allowbreak{}required'::text, 'transferred'::text, 'cancelled'::text, 'reminder'::text]))).
+\item PRIMARY KEY (id).
+\item FOREIGN KEY (user\_\allowbreak{}id) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (booking\_\allowbreak{}id) REFERENCES labreserve.booking(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{audit\_\allowbreak{}event}
+Неизменяемый журнал значимых изменений.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+actor\_\allowbreak{}id & bigint & да & — \\
+table\_\allowbreak{}name & text & нет & — \\
+record\_\allowbreak{}key & jsonb & нет & — \\
+action & text & нет & — \\
+old\_\allowbreak{}data & jsonb & да & — \\
+new\_\allowbreak{}data & jsonb & да & — \\
+occurred\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+transaction\_\allowbreak{}id & bigint & нет & txid\_\allowbreak{}current() \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item PRIMARY KEY (id).
+\item FOREIGN KEY (actor\_\allowbreak{}id) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}
+\par\noindent\begin{minipage}{\linewidth}
+\subsection{conflict\_\allowbreak{}event}
+Отклонённый запрос для статистики конфликтов.\par\smallskip\noindent
+\begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
+\toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
+id & bigint & нет & IDENTITY \\
+user\_\allowbreak{}id & bigint & нет & — \\
+equipment\_\allowbreak{}id & bigint & нет & — \\
+requested\_\allowbreak{}period & time\_\allowbreak{}window & нет & — \\
+error\_\allowbreak{}code & text & нет & — \\
+occurred\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp() \\
+\bottomrule\end{tabular}\end{minipage}\par
+\begin{itemize}
+\item CHECK ((NOT upper\_\allowbreak{}inf((requested\_\allowbreak{}period)::tstzrange))).
+\item PRIMARY KEY (id).
+\item FOREIGN KEY (user\_\allowbreak{}id) REFERENCES labreserve.app\_\allowbreak{}user(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\item FOREIGN KEY (equipment\_\allowbreak{}id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
+\end{itemize}

@@ -1,0 +1,7 @@
+2026-10-11
+PASS: 17 tables, 27 FK, 32 functions (19 external), 25 triggers, 38 indexes (13 explicit).
+PASS: 60 SQL assertions after full DROP/CREATE database.
+PASS: 5 real two-connection race scenarios.
+PASS: 375 unchanged stage-01 files (SHA-256).
+PASS: report.pdf built with XeLaTeX; 38 pages; no Overfull or unresolved references.
+ER status: awaiting teacher approval.
