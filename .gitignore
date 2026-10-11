@@ -1,0 +1,24 @@
+# Local AI project memory
+/AGENTS.md
+/REPO_MAP.md
+/ARCHITECTURE.md
+/docs/PROJECT_CONTEXT.md
+/docs/CURRENT_STATE.md
+/docs/DECISIONS.md
+
+# Local agent/runtime state
+/.agents/
+/.codex/
+/.aws/
+
+# Generated and temporary stage-01 files
+/stage-01/tmp/
+/stage-01/output/
+/stage-01/*.aux
+/stage-01/*.log
+/stage-01/*.out
+/stage-01/*.synctex.gz
+/stage-01/*.toc
+/stage-01/*.fdb_latexmk
+/stage-01/*.fls
+/stage-01/*.xdv

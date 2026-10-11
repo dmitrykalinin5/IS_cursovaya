@@ -1,0 +1,506 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[T2A]{fontenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{indentfirst}
+
+\geometry{left=2.5cm, right=1.5cm, top=2cm, bottom=2cm}
+
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    breakatwhitespace=false,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    tabsize=4,
+    inputencoding=utf8,
+    extendedchars=true,
+    literate={а}{{\cyra}}1 {б}{{\cyrb}}1 {в}{{\cyrv}}1 {г}{{\cyrg}}1
+             {д}{{\cyrd}}1 {е}{{\cyre}}1 {ё}{{\cyryo}}1 {ж}{{\cyrzh}}1
+             {з}{{\cyrz}}1 {и}{{\cyri}}1 {й}{{\cyrishrt}}1 {к}{{\cyrk}}1
+             {л}{{\cyrl}}1 {м}{{\cyrm}}1 {н}{{\cyrn}}1 {о}{{\cyro}}1
+             {п}{{\cyrp}}1 {р}{{\cyrr}}1 {с}{{\cyrs}}1 {т}{{\cyrt}}1
+             {у}{{\cyru}}1 {ф}{{\cyrf}}1 {х}{{\cyrh}}1 {ц}{{\cyrc}}1
+             {ч}{{\cyrch}}1 {ш}{{\cyrsh}}1 {щ}{{\cyrshch}}1 {ъ}{{\cyrhrdsn}}1
+             {ы}{{\cyrery}}1 {ь}{{\cyrsftsn}}1 {э}{{\cyrerev}}1 {ю}{{\cyryu}}1
+             {я}{{\cyrya}}1 {А}{{\CYRA}}1 {Б}{{\CYRB}}1 {В}{{\CYRV}}1
+             {Г}{{\CYRG}}1 {Д}{{\CYRD}}1 {Е}{{\CYRE}}1 {Ё}{{\CYRYO}}1
+             {Ж}{{\CYRZH}}1 {З}{{\CYRZ}}1 {И}{{\CYRI}}1 {Й}{{\CYRISHRT}}1
+             {К}{{\CYRK}}1 {Л}{{\CYRL}}1 {М}{{\CYRM}}1 {Н}{{\CYRN}}1
+             {О}{{\CYRO}}1 {П}{{\CYRP}}1 {Р}{{\CYRR}}1 {С}{{\CYRS}}1
+             {Т}{{\CYRT}}1 {У}{{\CYRU}}1 {Ф}{{\CYRF}}1 {Х}{{\CYRH}}1
+             {Ц}{{\CYRC}}1 {Ч}{{\CYRCH}}1 {Ш}{{\CYRSH}}1 {Щ}{{\CYRSHCH}}1
+             {Ъ}{{\CYRHRDSN}}1 {Ы}{{\CYRERY}}1 {Ь}{{\CYRSFTSN}}1
+             {Э}{{\CYREREV}}1 {Ю}{{\CYRYU}}1 {Я}{{\CYRYA}}1
+             {→}{{$\rightarrow$}}1
+}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+    \large
+    Национальный исследовательский университет ИТМО\\
+    Факультет Программной Инженерии и Компьютерной техники\\
+    \vspace{3cm}
+    \textbf{\Large ОПИ}\\
+    \vspace{0.5cm}
+    \textbf{\Large Отчёт по лабораторной работе №2}\\
+    \vspace{0.5cm}
+    \textbf{\Large Вариант 771267}\\
+    \vspace{3cm}
+    \begin{flushright}
+        Выполнили:\\
+        Калинин Дмитрий Викторович\\
+        Никифоров Кирилл Евгеньевич\\
+        \vspace{0.5cm}
+        Группа: P3209\\
+        \vspace{0.5cm}
+        Преподаватель:\\
+        Ермаков Михаил Константинович\\
+        Клименков Сергей Викторович\\
+    \end{flushright}
+    \vfill
+    Санкт-Петербург, 2026
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Задание}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{commits.png}
+    \caption{Блок-схема варианта лабораторной работы (вариант 771267)}
+\end{figure}
+
+Сконфигурировать в своём домашнем каталоге репозитории svn и git и загрузить в них начальную ревизию файлов с исходными кодами (в соответствии с выданным вариантом).
+
+Воспроизвести последовательность команд для систем контроля версий svn и git, осуществляющих операции над исходным кодом, приведённые на блок-схеме.
+
+При составлении последовательности команд необходимо учитывать следующие условия:
+\begin{itemize}
+    \item Цвет элементов схемы указывает на пользователя, совершившего действие (красный --- первый, синий --- второй).
+    \item Цифры над узлами --- номер ревизии. Ревизии создаются последовательно.
+    \item Необходимо разрешать конфликты между версиями, если они возникают.
+\end{itemize}
+
+\newpage
+\section{Создание и конфигурация репозиториев}
+
+\subsection{Git}
+
+Инициализация репозитория:
+\begin{lstlisting}[language=bash]
+mkdir -p ~/Documents/opi/opi2/git_repo
+cd ~/Documents/opi/opi2/git_repo
+git init
+git config --global user.name "Kirill"
+git config --global user.email "kirill@itmo.ru"
+\end{lstlisting}
+
+\subsection{SVN}
+
+Создание репозитория и базовой структуры:
+\begin{lstlisting}[language=bash]
+svnadmin create ~/Documents/opi/opi2/svn_repo
+svn mkdir file:///home/ogultra/Documents/opi/opi2/svn_repo/trunk \
+          file:///home/ogultra/Documents/opi/opi2/svn_repo/branches \
+          --username Kirill --no-auth-cache \
+          -m "Init repository structure"
+svn checkout file:///home/ogultra/Documents/opi/opi2/svn_repo/trunk \
+             ~/Documents/opi/opi2/svn_wc \
+             --username Kirill --no-auth-cache
+\end{lstlisting}
+
+\newpage
+\section{Скрипт для Git}
+
+Скрипт воспроизводит полное дерево из 77 ревизий по блок-схеме варианта.
+Красный пользователь --- Kirill, синий --- Dmitry.
+Конфликты при слиянии разрешаются автоматически стратегией \texttt{--theirs}
+(принимается версия из входящей ветки).
+
+\begin{lstlisting}[language=bash]
+#!/bin/bash
+set -e
+
+BASE_DIR="$HOME/Documents/opi/opi2"
+COMMITS_DIR="$BASE_DIR/commits"
+GIT_REPO="$BASE_DIR/git_repo"
+
+rm -rf "$GIT_REPO"
+mkdir -p "$GIT_REPO"
+cd "$GIT_REPO"
+git init
+
+# Kirill = красный (первый пользователь)
+# Dmitry = синий  (второй пользователь)
+
+commit_git() {
+    local rev=$1
+    local author=$2
+    local email="${author,,}@itmo.ru"
+    cp -rf "$COMMITS_DIR/commit$rev/"*.java . 2>/dev/null
+    git add .
+    GIT_AUTHOR_NAME="$author"  GIT_AUTHOR_EMAIL="$email" \
+    GIT_COMMITTER_NAME="$author" GIT_COMMITTER_EMAIL="$email" \
+    git commit -m "Revision r$rev" --allow-empty
+}
+
+merge_git() {
+    local branch=$1
+    local msg=$2
+    local author=$3
+    local email="${author,,}@itmo.ru"
+    GIT_AUTHOR_NAME="$author"  GIT_AUTHOR_EMAIL="$email" \
+    GIT_COMMITTER_NAME="$author" GIT_COMMITTER_EMAIL="$email" \
+    git merge "$branch" --no-ff -m "$msg" 2>/dev/null || {
+        git checkout --theirs -- . 2>/dev/null || true
+        git add .
+        GIT_AUTHOR_NAME="$author"  GIT_AUTHOR_EMAIL="$email" \
+        GIT_COMMITTER_NAME="$author" GIT_COMMITTER_EMAIL="$email" \
+        git commit -m "$msg (conflict resolved)"
+    }
+}
+
+# ШАГ 1. master: r0
+commit_git 0 "Kirill"
+R0=$(git rev-parse HEAD)
+
+# ШАГ 2. branch_blue6: r0->r1->r11->r18..r21->r35->r37->r52
+git checkout -b branch_blue6 $R0
+commit_git 1 "Dmitry"; R1=$(git rev-parse HEAD)
+commit_git 11 "Dmitry"; R11=$(git rev-parse HEAD)
+for i in 18 19 20 21 35 37 52; do commit_git $i "Dmitry"; done
+
+# ШАГ 3. branch_blue2: r1->r2->r22->r40->r42->r50->r57
+git checkout -b branch_blue2 $R1
+commit_git 2 "Dmitry"; R2=$(git rev-parse HEAD)
+for i in 22 40 42 50 57; do commit_git $i "Dmitry"; done
+
+# ШАГ 4. branch_red3: r2->r3->r25->r30->r49->r69
+git checkout -b branch_red3 $R2
+commit_git 3 "Kirill"; R3=$(git rev-parse HEAD)
+for i in 25 30 49 69; do commit_git $i "Kirill"; done
+
+# ШАГ 5. branch_blue7: r3->r4->r17->r27
+git checkout -b branch_blue7 $R3
+commit_git 4 "Dmitry"; R4=$(git rev-parse HEAD)
+commit_git 17 "Dmitry"
+commit_git 27 "Dmitry"; R27=$(git rev-parse HEAD)
+
+# ШАГ 6. branch_blue1: r27->r28->r31->r43->r47->r51->r62
+git checkout -b branch_blue1 $R27
+for i in 28 31 43 47 51 62; do commit_git $i "Dmitry"; done
+
+# ШАГ 7. branch_blue4: r11->r12->r13
+git checkout -b branch_blue4 $R11
+commit_git 12 "Dmitry"
+commit_git 13 "Dmitry"; R13=$(git rev-parse HEAD)
+
+# ШАГ 8. branch_blue3: r13->r14
+git checkout -b branch_blue3 $R13
+commit_git 14 "Dmitry"
+
+# ШАГ 9. branch_blue4 продолжение: r24->r26->r29->r32->r66
+git checkout branch_blue4
+for i in 24 26 29 32 66; do commit_git $i "Dmitry"; done
+
+# ШАГ 10. branch_red4: r4->r5->r10->r15
+git checkout -b branch_red4 $R4
+commit_git 5 "Kirill"; R5=$(git rev-parse HEAD)
+commit_git 10 "Kirill"
+commit_git 15 "Kirill"; R15=$(git rev-parse HEAD)
+
+# ШАГ 11. branch_red5: r5->r6->r53->r55
+git checkout -b branch_red5 $R5
+for i in 6 53 55; do commit_git $i "Kirill"; done
+
+# ШАГ 12. branch_red2: r15->r16->r33->r39->r45
+git checkout -b branch_red2 $R15
+for i in 16 33 39 45; do commit_git $i "Kirill"; done
+
+# ШАГ 13. branch_red4: r36->r38->r54, r58=merge r57, r68, r70=merge r69
+git checkout branch_red4
+for i in 36 38 54; do commit_git $i "Kirill"; done
+merge_git branch_blue2 "Revision r58" "Kirill"
+commit_git 68 "Kirill"
+merge_git branch_red3 "Revision r70" "Kirill"
+
+# ШАГ 14. branch_blue6: r56=merge r55, r60
+git checkout branch_blue6
+merge_git branch_red5 "Revision r56" "Dmitry"
+commit_git 60 "Dmitry"
+
+# ШАГ 15. branch_blue3: r61=merge r60, r63=merge r62, r73
+git checkout branch_blue3
+merge_git branch_blue6 "Revision r61" "Dmitry"
+merge_git branch_blue1 "Revision r63" "Dmitry"
+commit_git 73 "Dmitry"
+
+# ШАГ 16. branch_blue7: r46->r48->r64->r65->r72, r74=merge r73
+git checkout branch_blue7
+for i in 46 48 64 65 72; do commit_git $i "Dmitry"; done
+merge_git branch_blue3 "Revision r74" "Dmitry"
+
+# ШАГ 17. master: r7->r9->r44->r59
+git checkout master
+commit_git 7 "Kirill"; R7=$(git rev-parse HEAD)
+for i in 9 44 59; do commit_git $i "Kirill"; done
+
+# ШАГ 18. branch_blue5: r7->r8->r23->r34->r41, r75=merge r74
+git checkout -b branch_blue5 $R7
+for i in 8 23 34 41; do commit_git $i "Dmitry"; done
+merge_git branch_blue7 "Revision r75" "Dmitry"
+
+# ШАГ 19. branch_red2: r67=merge r66, r71=merge r70, r76=merge r75
+git checkout branch_red2
+merge_git branch_blue4 "Revision r67" "Kirill"
+merge_git branch_red4  "Revision r71" "Kirill"
+merge_git branch_blue5 "Revision r76" "Kirill"
+
+# ШАГ 20. master: r77=merge branch_red2
+git checkout master
+merge_git branch_red2 "Revision r77" "Kirill"
+
+echo ">>> Done!"
+\end{lstlisting}
+
+\newpage
+\section{Скрипт для SVN}
+
+В SVN ветки реализованы как копии директорий (\texttt{svn copy}).
+Структура репозитория: \texttt{trunk} (основная ветка) и \texttt{branches/} (все остальные ветки).
+Для гарантии непустых коммитов используется файл-маркер \texttt{.revision}.
+
+\begin{lstlisting}[language=bash]
+#!/bin/bash
+set -e
+
+BASE_DIR="$HOME/Documents/opi/opi2"
+COMMITS_DIR="$BASE_DIR/commits"
+SVN_REPO="$BASE_DIR/svn_repo"
+SVN_URL="file://$SVN_REPO"
+WC="$BASE_DIR/svn_wc"
+
+rm -rf "$SVN_REPO" "$WC"
+svnadmin create "$SVN_REPO"
+
+# Хук для установки автора без пароля
+cat > "$SVN_REPO/hooks/pre-revprop-change" << 'EOF'
+#!/bin/sh
+exit 0
+EOF
+chmod +x "$SVN_REPO/hooks/pre-revprop-change"
+
+get_head_rev() { svnlook youngest "$SVN_REPO"; }
+
+commit_svn() {
+    local rev=$1 author=$2
+    cp -f "$COMMITS_DIR/commit$rev/"*.java "$WC/" 2>/dev/null
+    svn add "$WC/"*.java --force -q 2>/dev/null || true
+    echo "r$rev" > "$WC/.revision"
+    svn add "$WC/.revision" --force -q 2>/dev/null || true
+    svn commit "$WC" --username "$author" --no-auth-cache \
+        -m "Revision r$rev"
+    svnadmin setrevprop "$SVN_REPO" -r "$(get_head_rev)" \
+        svn:author "$author" 2>/dev/null || true
+}
+
+branch_svn() {
+    local src_url=$1 dst_name=$2 author=$3 msg=$4
+    svn copy "$src_url" "$SVN_URL/branches/$dst_name" \
+        --username "$author" --no-auth-cache -m "$msg"
+    svnadmin setrevprop "$SVN_REPO" -r "$(get_head_rev)" \
+        svn:author "$author" 2>/dev/null || true
+    svn update "$WC" --no-auth-cache -q 2>/dev/null || true
+}
+
+switch_svn() {
+    local target=$1
+    if [ "$target" = "trunk" ]; then
+        svn switch "$SVN_URL/trunk" "$WC" --ignore-ancestry -q
+    else
+        svn switch "$SVN_URL/branches/$target" "$WC" \
+            --ignore-ancestry -q
+    fi
+    svn update "$WC" --no-auth-cache -q 2>/dev/null || true
+}
+
+merge_svn() {
+    local src_name=$1 rev_label=$2 author=$3
+    local src_url="$SVN_URL/branches/$src_name"
+    [ "$src_name" = "trunk" ] && src_url="$SVN_URL/trunk"
+    svn update "$WC" --no-auth-cache -q 2>/dev/null || true
+    svn merge --allow-mixed-revisions "$src_url" "$WC" -q \
+        2>/dev/null || true
+    svn resolve --accept working -R "$WC" -q 2>/dev/null || true
+    echo "merge-$rev_label" > "$WC/.revision"
+    svn commit "$WC" --username "$author" --no-auth-cache \
+        -m "Revision $rev_label (merge from $src_name)" || true
+    svnadmin setrevprop "$SVN_REPO" -r "$(get_head_rev)" \
+        svn:author "$author" 2>/dev/null || true
+}
+
+# Инициализация
+svn mkdir "$SVN_URL/trunk" "$SVN_URL/branches" \
+    --username Kirill --no-auth-cache \
+    -m "Init repository structure"
+svn checkout "$SVN_URL/trunk" "$WC" \
+    --username Kirill --no-auth-cache -q
+
+# r0 - trunk (Kirill)
+commit_svn 0 "Kirill"; R0_SVN=$(get_head_rev)
+
+# branch_blue6: r1->r11->r18..r21->r35->r37->r52
+branch_svn "$SVN_URL/trunk@$R0_SVN" "branch_blue6" \
+    "Dmitry" "Create branch_blue6 from trunk (r0)"
+switch_svn "branch_blue6"
+commit_svn 1 "Dmitry"; R1_SVN=$(get_head_rev)
+commit_svn 11 "Dmitry"; R11_SVN=$(get_head_rev)
+for i in 18 19 20 21 35 37 52; do commit_svn $i "Dmitry"; done
+
+# branch_blue2: r2->r22->r40->r42->r50->r57
+branch_svn "$SVN_URL/branches/branch_blue6@$R1_SVN" \
+    "branch_blue2" "Dmitry" "Create branch_blue2 (r1)"
+switch_svn "branch_blue2"
+commit_svn 2 "Dmitry"; R2_SVN=$(get_head_rev)
+for i in 22 40 42 50 57; do commit_svn $i "Dmitry"; done
+
+# branch_red3: r3->r25->r30->r49->r69
+branch_svn "$SVN_URL/branches/branch_blue2@$R2_SVN" \
+    "branch_red3" "Kirill" "Create branch_red3 (r2)"
+switch_svn "branch_red3"
+commit_svn 3 "Kirill"; R3_SVN=$(get_head_rev)
+for i in 25 30 49 69; do commit_svn $i "Kirill"; done
+
+# branch_blue7: r4->r17->r27
+branch_svn "$SVN_URL/branches/branch_red3@$R3_SVN" \
+    "branch_blue7" "Dmitry" "Create branch_blue7 (r3)"
+switch_svn "branch_blue7"
+commit_svn 4 "Dmitry"; R4_SVN=$(get_head_rev)
+commit_svn 17 "Dmitry"
+commit_svn 27 "Dmitry"; R27_SVN=$(get_head_rev)
+
+# branch_blue1: r28->r31->r43->r47->r51->r62
+branch_svn "$SVN_URL/branches/branch_blue7@$R27_SVN" \
+    "branch_blue1" "Dmitry" "Create branch_blue1 (r27)"
+switch_svn "branch_blue1"
+for i in 28 31 43 47 51 62; do commit_svn $i "Dmitry"; done
+
+# branch_blue4: r12->r13
+branch_svn "$SVN_URL/branches/branch_blue6@$R11_SVN" \
+    "branch_blue4" "Dmitry" "Create branch_blue4 (r11)"
+switch_svn "branch_blue4"
+commit_svn 12 "Dmitry"
+commit_svn 13 "Dmitry"; R13_SVN=$(get_head_rev)
+
+# branch_blue3: r14
+branch_svn "$SVN_URL/branches/branch_blue4@$R13_SVN" \
+    "branch_blue3" "Dmitry" "Create branch_blue3 (r13)"
+switch_svn "branch_blue3"
+commit_svn 14 "Dmitry"
+
+# branch_blue4 продолжение: r24->r26->r29->r32->r66
+switch_svn "branch_blue4"
+for i in 24 26 29 32 66; do commit_svn $i "Dmitry"; done
+
+# branch_red4: r5->r10->r15
+branch_svn "$SVN_URL/branches/branch_blue7@$R4_SVN" \
+    "branch_red4" "Kirill" "Create branch_red4 (r4)"
+switch_svn "branch_red4"
+commit_svn 5 "Kirill"; R5_SVN=$(get_head_rev)
+commit_svn 10 "Kirill"
+commit_svn 15 "Kirill"; R15_SVN=$(get_head_rev)
+
+# branch_red5: r6->r53->r55
+branch_svn "$SVN_URL/branches/branch_red4@$R5_SVN" \
+    "branch_red5" "Kirill" "Create branch_red5 (r5)"
+switch_svn "branch_red5"
+for i in 6 53 55; do commit_svn $i "Kirill"; done
+
+# branch_red2: r16->r33->r39->r45
+branch_svn "$SVN_URL/branches/branch_red4@$R15_SVN" \
+    "branch_red2" "Kirill" "Create branch_red2 (r15)"
+switch_svn "branch_red2"
+for i in 16 33 39 45; do commit_svn $i "Kirill"; done
+
+# branch_red4: r36->r38->r54, r58=merge r57, r68, r70=merge r69
+switch_svn "branch_red4"
+for i in 36 38 54; do commit_svn $i "Kirill"; done
+merge_svn "branch_blue2" "r58" "Kirill"
+commit_svn 68 "Kirill"
+merge_svn "branch_red3" "r70" "Kirill"
+
+# branch_blue6: r56=merge r55, r60
+switch_svn "branch_blue6"
+merge_svn "branch_red5" "r56" "Dmitry"
+commit_svn 60 "Dmitry"
+
+# branch_blue3: r61=merge r60, r63=merge r62, r73
+switch_svn "branch_blue3"
+merge_svn "branch_blue6" "r61" "Dmitry"
+merge_svn "branch_blue1" "r63" "Dmitry"
+commit_svn 73 "Dmitry"
+
+# branch_blue7: r46->r48->r64->r65->r72, r74=merge r73
+switch_svn "branch_blue7"
+for i in 46 48 64 65 72; do commit_svn $i "Dmitry"; done
+merge_svn "branch_blue3" "r74" "Dmitry"
+
+# trunk: r7, branch_blue5, r9->r44->r59
+switch_svn "trunk"
+commit_svn 7 "Kirill"; R7_SVN=$(get_head_rev)
+branch_svn "$SVN_URL/trunk@$R7_SVN" "branch_blue5" \
+    "Dmitry" "Create branch_blue5 from trunk (r7)"
+for i in 9 44 59; do commit_svn $i "Kirill"; done
+
+# branch_blue5: r8->r23->r34->r41, r75=merge r74
+switch_svn "branch_blue5"
+for i in 8 23 34 41; do commit_svn $i "Dmitry"; done
+merge_svn "branch_blue7" "r75" "Dmitry"
+
+# branch_red2: r67=merge r66, r71=merge r70, r76=merge r75
+switch_svn "branch_red2"
+merge_svn "branch_blue4" "r67" "Kirill"
+merge_svn "branch_red4"  "r71" "Kirill"
+merge_svn "branch_blue5" "r76" "Kirill"
+
+# trunk: r77=merge branch_red2
+switch_svn "trunk"
+merge_svn "branch_red2" "r77" "Kirill"
+
+echo ">>> SVN Done!"
+\end{lstlisting}
+
+\newpage
+\section{Вывод}
+
+В ходе выполнения лабораторной работы были настроены репозитории SVN и Git
+и воспроизведена последовательность из 77 ревизий в соответствии с блок-схемой варианта.
+
+Были изучены основные команды для работы с системами контроля версий:
+\texttt{commit}, \texttt{merge}, \texttt{checkout}, \texttt{branch} для Git;
+\texttt{commit}, \texttt{copy}, \texttt{switch}, \texttt{merge}, \texttt{resolve} для SVN.
+
+Изучены механизмы ветвления и способы разрешения конфликтов при слиянии веток,
+возникающих при одновременном редактировании файлов разными пользователями.
+Конфликты разрешались как вручную через редактор vim (удаление маркеров \texttt{<<<<<<<},
+\texttt{=======}, \texttt{>>>>>>>}), так и автоматически через стратегию \texttt{--theirs}.
+
+Полученные навыки применимы при командной разработке программного обеспечения.
+
+\end{document}
