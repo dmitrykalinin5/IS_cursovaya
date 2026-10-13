@@ -1,0 +1,7 @@
+PASS: I01 repeat preserves data, foreign rows, ACL and function definition
+PASS: I02 existing prefix collision retained, install refused
+PASS: I03 disabled business trigger detected
+PASS: I04 changed source marker cannot trigger overwrite
+PASS: I07 objects without manifest are not overwritten
+PASS: I05 wrong database/user refused in shell and SQL
+PASS: I06 clean install verification succeeds after restoring test fixtures

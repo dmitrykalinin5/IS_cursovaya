@@ -53,3 +53,9 @@ Backend получает SELECT и EXECUTE только именованного
 - PostgreSQL, диапазоны: https://www.postgresql.org/docs/18/rangetypes.html
 - PostgreSQL, уровни изоляции: https://www.postgresql.org/docs/18/transaction-iso.html
 - PostgreSQL, btree_gist: https://www.postgresql.org/docs/18/btree-gist.html
+
+## Вариант Helios
+
+Общая SQL-реализация адаптируется в `s466088` с префиксом `lr_`; контракт `labreserve.actor_id` сохраняется. При доступном установленном btree_gist сохраняется EXCLUDE. Без расширения `lr_check_booking` после UPDATE строки оборудования проверяет пересечения с другими confirmed и выдаёт 23P01. VOLATILE обеспечивает новое чтение после ожидания в READ COMMITTED; REPEATABLE READ завершается 40001 при изменённой после снимка строке оборудования. Триггер действует для прямого INSERT/UPDATE, включая несколько строк одного оператора.
+
+Проверены API и прямой DML в двух соединениях, оба порядка ТО/брони и откат первого запроса: `HELIOS_TESTING.md`. Права устанавливаются только на перечисленные `lr_`-объекты, а не на все объекты студенческой схемы. Студенческий владелец сохраняет административные права на собственные объекты; отдельная backend-роль требует участия DBA.

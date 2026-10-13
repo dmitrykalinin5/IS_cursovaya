@@ -1,0 +1,63 @@
+BEGIN
+SET
+CREATE FUNCTION
+CREATE FUNCTION
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T01 valid booking
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T02 missing admission SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T03 inactive user through direct DML SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T04 overlap SQLSTATE=23P01
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T05 half-open adjacent intervals
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T06 cancelled booking does not block
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T07 immutable cancelled booking SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T08 empty interval SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T09 unsupported function SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T10 cannot start before booked interval SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T11 owner authorization SQLSTATE=42501
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T12 maintenance affects future booking
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T13 at least three alternatives
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T14 transactional notification
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T15 maintenance blocks booking SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T16 explicit alternative selected
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T17 alternative choice recorded
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T18 alternative cannot be chosen twice SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T19 BR6 same equipment has first rank
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T20 no auto-reconfirmation after maintenance cancellation
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T21 report does not itself change availability
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T22 administrator confirms technical cause
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T23 fault marks affected booking
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T24 broken equipment rejected SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T25 user cannot confirm technical cause SQLSTATE=42501
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T26 infinite fault excludes original equipment alternatives
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T27 other cause prevents available state
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T28 absence of alternatives
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T29 technician restores availability
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T30 valid session opening
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T31 duplicate session SQLSTATE=23505
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T32 session closure completes booking
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T33 double close rejected SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T34 immutable completed booking SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T35 immutable audit SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T36 audit records meaningful changes
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T37 time zone equivalence
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T38 rejected request recorded
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T39 clipped union downtime metrics
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T40 equivalent function across types
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T41 booking history not deletable SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T42 maximal free intervals
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T43 reminders idempotent
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T44 stale candidate rechecked at selection SQLSTATE=23P01
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T45 administrator grants admissions SQLSTATE=42501
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T46 search intersects future admission validity
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T47 not-yet-valid admission rejected SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T48 admission must cover whole booking SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T49 revoked admission rejected SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T50 admission history retained SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T51 downtime history retained SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T52 administrative closure needs comment SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T53 administrative closure comment retained
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T54 inclusive upper bound rejected SQLSTATE=23514
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T55 17 physical tables
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T56 overlapping downtime counted as union
+psql:stage-02/output/helios/bundle/assertions.sql:107: NOTICE:  PASS: T57 actual duration differs from planned hour
+DO
+ROLLBACK

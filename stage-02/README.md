@@ -31,12 +31,15 @@
 | `docs/TESTING.md`, `*-results.*` | Проверенное окружение и сохранённые результаты |
 | `docs/VISUAL_QA.md` | Проверка отчёта и неизменности первого этапа |
 | `docs/generate_models.py`, `generate_report_tables.py` | Воспроизводимые таблицы отчёта и диаграммы по экспорту БД |
+| `sql/helios/` | Адаптер общей SQL-реализации, preflight, безопасная установка, smoke и конкурентные тесты |
+| `scripts/deploy_helios.sh`, `scripts/check_helios.sh` | Установка и проверка в studs.s466088, без управления БД/схемой |
+| `docs/HELIOS_DEPLOY.md`, `HELIOS_TESTING.md` | Команды подключения, демонстрации и фактические результаты проверки |
 | `output/` | Локальные журналы и растровые страницы, исключены из Git |
 
 ## Запуск на Fedora
 
 Нужны PostgreSQL 14+ (multirange/range_agg), пакет contrib для btree_gist, Python 3 и psql.
-Фактически проверена версия 18.6; другие версии и конфигурация Helios ещё не проверены.
+Исходный LOCAL проверен на 18.6; полный runner также повторно проверен на 16.15. Адаптер Helios испытан локально на 18.6 без расширения и 16.15 с расширением; университетский сервер ещё не проверен.
 Установка отсутствующих пакетов на личной машине:
 
 ```bash
@@ -90,3 +93,19 @@ cp output/report.pdf report.pdf
 Критические действия вызываются через native JPA-запросы к функциям, с COMMIT/ROLLBACK внешней транзакции; Spring JDBC запрещён.
 40001/40P01 требуют ограниченного повтора всей транзакции. 23P01/23514 означают пересчёт доступности и вариантов.
 Проектные решения описаны в `docs/MODEL.md`.
+
+## Развёртывание на Helios
+
+На Helios используются существующая `studs.s466088` и префикс `lr_`. Общие SQL-исходники LOCAL сохраняются; адаптер создаёт временный комплект. Если btree_gist недоступно, конкурентные пересечения блокирует сериализующий BEFORE-триггер с SQLSTATE 23P01. Повторная установка проверяет манифест и структуру, сохраняет данные и не повторяет seed.
+
+После передачи файлов и SSH-входа, из каталога stage-02:
+
+```bash
+export PGHOST=pg PGDATABASE=studs PGUSER=s466088
+bash scripts/deploy_helios.sh preflight
+bash scripts/deploy_helios.sh install
+bash scripts/check_helios.sh
+psql -X -h pg -U s466088 -d studs -f sql/helios/demo.sql
+```
+
+Подробная передача файлов, проверка конкуренции и подключение JPA — [HELIOS_DEPLOY.md](docs/HELIOS_DEPLOY.md). Фактические результаты — [HELIOS_TESTING.md](docs/HELIOS_TESTING.md). Локальные cleanup/create/drop/run_checks на Helios не запускаются. Реальная SSH-авторизация в этой сессии отклонена; установка на университетском сервере не выполнялась.
