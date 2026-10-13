@@ -11,9 +11,11 @@
 | Проверки | `sql/scripts/run_checks.sh` | `scripts/check_helios.sh` |
 | Пересечения броней | EXCLUDE / btree_gist | EXCLUDE при доступном расширении; иначе сериализующий триггер |
 
-На Helios нужны PostgreSQL 14+ (multirange и range_agg), psql с поддержкой `\if`, Python 3, USAGE/CREATE в собственной схеме и TEMP в `studs`. SUPERUSER, CREATEROLE и CREATE в базе не требуются. Если сервер старше по возрасту, чем PostgreSQL 14, preflight завершится ошибкой: текущая модель использует multirange и не устанавливается частично.
+На Helios нужны PostgreSQL 14+ (multirange и range_agg), psql с поддержкой `\if`, Python 3.8+, USAGE/CREATE в собственной схеме и TEMP в `studs`. SUPERUSER, CREATEROLE и CREATE в базе не требуются. Если сервер старше по возрасту, чем PostgreSQL 14, preflight завершится ошибкой: текущая модель использует multirange и не устанавливается частично.
 
 В студенческой схеме размещается также служебная таблица `lr_deployment`; она не относится к 17 предметным таблицам. Все функции, домен, индексы, триггеры, явные и автоматически созданные ограничения и последовательности имеют префикс `lr_` (служебные массивные типы PostgreSQL — `_lr_`). Имя настройки сеанса **`labreserve.actor_id` сохраняется**.
+
+На реальном Helios доступен Python 3.11 под именем `python3.11`. Скрипты используют `helios_python.sh`, который выбирает python3, python3.11 или python и проверяет версию; при необходимости можно задать `HELIOS_PYTHON`.
 
 ## 2. Диагностика
 
@@ -52,8 +54,8 @@ ssh -p 2222 s466088@helios.cs.ifmo.ru
 ```bash
 cd stage-02
 mkdir -p output
-tar --exclude='__pycache__' --exclude='*.pyc' -czf output/labreserve-helios.tar.gz sql scripts docs/HELIOS_DEPLOY.md docs/HELIOS_TESTING.md README.md
-scp -P 2222 output/labreserve-helios.tar.gz s466088@helios.cs.ifmo.ru:~/labreserve-stage02.tar.gz
+tar --exclude='__pycache__' --exclude='*.pyc' -czf output/labreserve-helios.tar.gz sql scripts docs/HELIOS_DEPLOY.md docs/HELIOS_TESTING.md docs/helios-*.json docs/helios-*.txt README.md
+scp -P 2222 output/labreserve-helios.tar.gz s466088@helios.cs.ifmo.ru:~/labreserve-stage02-20261013.tar.gz
 ```
 
 Если локальный SSH сообщает `Bad owner or permissions on /etc/ssh/...`, для этого подключения можно добавить `-F /dev/null` к ssh и scp. Это обход системного конфига, а не отключение проверки ключа сервера. При нестандартном пути ключа укажите `-i /путь/к/ключу`.
@@ -71,9 +73,9 @@ unset PGPASSWORD
 После SSH-входа:
 
 ```bash
-mkdir -p ~/labreserve-stage02
-cd ~/labreserve-stage02
-tar -xzf ~/labreserve-stage02.tar.gz
+mkdir -p ~/labreserve-stage02-20261013
+cd ~/labreserve-stage02-20261013
+tar -xzf ~/labreserve-stage02-20261013.tar.gz
 export PGHOST=pg PGDATABASE=studs PGUSER=s466088
 bash scripts/deploy_helios.sh preflight
 bash scripts/deploy_helios.sh install
@@ -140,7 +142,7 @@ cat output/helios-concurrency.json
 
 ```bash
 ssh -p 2222 s466088@helios.cs.ifmo.ru
-cd ~/labreserve-stage02
+cd ~/labreserve-stage02-20261013
 psql -X -h pg -U s466088 -d studs -f sql/helios/demo.sql
 bash scripts/check_helios.sh
 ```
@@ -198,4 +200,8 @@ ssh -p 2222 -N -L 127.0.0.1:15432:pg:5432 s466088@helios.cs.ifmo.ru
 
 ## 11. Фактические результаты
 
-Результаты проверки 2026-10-13 и сохранённые свидетельства перечислены в `HELIOS_TESTING.md`. SSH-хост был доступен, но авторизация `s466088` отклонена (`Permission denied (publickey,keyboard-interactive)`). **Реальной установки на Helios не было**; версия и состав расширений университетского PostgreSQL остаются неизвестны. Приведённые команды предназначены для установки после входа с действующей авторизацией.
+Результаты проверки 2026-10-13 сохранены в `HELIOS_TESTING.md` и `helios-remote-results.json`. База **реально установлена** на `pg`, PostgreSQL 18.3, внутри `studs.s466088`. Права SUPERUSER/CREATEROLE/CREATE в базе отсутствуют; btree_gist не установлено, используется проверенный trigger-вариант.
+
+Прошли 57 бизнес-тестов, 18 smoke, 10 конкурентных сценариев и 7 тестов адаптера. Повтор установки не изменил данные. Каталожные снимки 42 посторонних отношений и шести функций, включая владельцев, ACL, столбцы, ограничения и триггеры, совпали. Чужие строки не читались и не изменялись.
+
+Материалы и журналы на Helios: `~/labreserve-stage02-20261013`, результаты — `output/helios/`. Предыдущий отказ SSH устранён входом с предоставленной пользователем авторизацией; учётные данные в материалы не включались. Java/backend и WildFly в рамках этой задачи не развёртывались.

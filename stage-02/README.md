@@ -32,14 +32,14 @@
 | `docs/VISUAL_QA.md` | Проверка отчёта и неизменности первого этапа |
 | `docs/generate_models.py`, `generate_report_tables.py` | Воспроизводимые таблицы отчёта и диаграммы по экспорту БД |
 | `sql/helios/` | Адаптер общей SQL-реализации, preflight, безопасная установка, smoke и конкурентные тесты |
-| `scripts/deploy_helios.sh`, `scripts/check_helios.sh` | Установка и проверка в studs.s466088, без управления БД/схемой |
+| `scripts/deploy_helios.sh`, `scripts/check_helios.sh`, `scripts/helios_python.sh` | Установка и проверка в studs.s466088, без управления БД/схемой |
 | `docs/HELIOS_DEPLOY.md`, `HELIOS_TESTING.md` | Команды подключения, демонстрации и фактические результаты проверки |
 | `output/` | Локальные журналы и растровые страницы, исключены из Git |
 
 ## Запуск на Fedora
 
 Нужны PostgreSQL 14+ (multirange/range_agg), пакет contrib для btree_gist, Python 3 и psql.
-Исходный LOCAL проверен на 18.6; полный runner также повторно проверен на 16.15. Адаптер Helios испытан локально на 18.6 без расширения и 16.15 с расширением; университетский сервер ещё не проверен.
+Исходный LOCAL проверен на 18.6; полный runner также повторно проверен на 16.15. Адаптер Helios испытан локально на 18.6 без расширения и 16.15 с расширением; на реальном Helios PostgreSQL 18.3 вариант без расширения прошёл 57 бизнес-тестов, 18 smoke и 10 конкурентных сценариев.
 Установка отсутствующих пакетов на личной машине:
 
 ```bash
@@ -108,4 +108,4 @@ bash scripts/check_helios.sh
 psql -X -h pg -U s466088 -d studs -f sql/helios/demo.sql
 ```
 
-Подробная передача файлов, проверка конкуренции и подключение JPA — [HELIOS_DEPLOY.md](docs/HELIOS_DEPLOY.md). Фактические результаты — [HELIOS_TESTING.md](docs/HELIOS_TESTING.md). Локальные cleanup/create/drop/run_checks на Helios не запускаются. Реальная SSH-авторизация в этой сессии отклонена; установка на университетском сервере не выполнялась.
+Подробная передача файлов, проверка конкуренции и подключение JPA — [HELIOS_DEPLOY.md](docs/HELIOS_DEPLOY.md). Фактические результаты — [HELIOS_TESTING.md](docs/HELIOS_TESTING.md). Локальные cleanup/create/drop/run_checks на Helios не запускаются. На реальном Helios база установлена в `studs.s466088`; вариант `trigger`, PostgreSQL 18.3. Рабочий каталог: `~/labreserve-stage02-20261013`.

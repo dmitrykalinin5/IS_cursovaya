@@ -10,3 +10,6 @@
 /diagrams/*.aux
 /diagrams/*.log
 /diagrams/*.out
+
+__pycache__/
+*.pyc

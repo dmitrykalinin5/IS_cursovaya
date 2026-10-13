@@ -1,0 +1,76 @@
+Built Helios bundle: /tmp/labreserve-helios.u9SADfI7 source 4e8d1ab392deb1a9dd7421b32eeee882bf6fa613f17297ba29744456c8a50fed
+Helios PostgreSQL diagnostics
+                                                                                 version
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 18.3 on amd64-portbld-freebsd14.4, compiled by FreeBSD clang version 19.1.7 (https://github.com/llvm/llvm-project.git llvmorg-19.1.7-0-gcd708029e0b2), 64-bit
+(1 строка)
+
+ current_user | current_database
+--------------+------------------
+ s466088      | studs
+(1 строка)
+
+ extname | extension_schema
+---------+------------------
+(0 строк)
+
+ name | default_version | installed_version
+------+-----------------+-------------------
+(0 строк)
+
+ database_create | temporary_objects
+-----------------+-------------------
+ f               | t
+(1 строка)
+
+ nspname | can_create | can_use
+---------+------------+---------
+ s466088 | t          | t
+(1 строка)
+
+ rolsuper | rolcreaterole
+----------+---------------
+ f        | f
+(1 строка)
+
+PASS: studs / s466088, PostgreSQL 14+, schema CREATE/USAGE and TEMP
+BEGIN
+SET
+SET
+ pg_advisory_xact_lock
+-----------------------
+
+(1 строка)
+
+CREATE FUNCTION
+DO
+PASS: same source and intact objects; existing data preserved, seed skipped
+COMMIT
+BEGIN
+SET
+SET
+SET
+CREATE FUNCTION
+CREATE FUNCTION
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H01 17 tables
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H02 32 functions / fixed search_path
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H03 27 validated FK
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H04 25 enabled triggers
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H05 catalogue and admission
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H06 create booking without session search_path
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H07 direct overlap blocked SQLSTATE=23P01
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H08 alternatives
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H09 outage and notifications
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H10 transfer
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H11 cancellation
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H12 fault confirmation
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H13 repair
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H14 actual session
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H15 notifications and audit
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H16 analytics
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H17 unknown equipment rejected SQLSTATE=23503
+psql:/tmp/labreserve-helios.u9SADfI7/smoke_tests.sql:71: NOTICE:  PASS: H18 actor setting retained
+DO
+ROLLBACK
+PASS: smoke checks rolled back (identity sequences can advance)
+PASS: installation and smoke checks completed
