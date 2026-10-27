@@ -50,6 +50,6 @@ for name in purpose:
     md.append('')
 (root/'docs/DATA_DICTIONARY.md').write_text('\n'.join(md))
 (root/'docs/dictionary.tex').write_text('\n'.join(texparts))
-# A single full diagram is generated together with the draw.io source.
+# Render the current draw.io source without overwriting manual edits.
 import subprocess,sys
 subprocess.run([sys.executable,str(root/'docs/generate_drawio.py')],check=True)

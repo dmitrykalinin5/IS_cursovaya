@@ -82,6 +82,8 @@ pg_ctl -D /tmp/labreserve-stage02-pg stop
 
 ## Сборка PDF
 
+Даталогическую схему редактируйте в `diagrams/logical.xml`. Генераторы читают этот файл и обновляют TEX/PDF; ручные изменения XML сохраняются.
+
 ```bash
 python3 docs/generate_models.py
 python3 docs/generate_report_tables.py
