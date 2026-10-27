@@ -7,7 +7,9 @@ names={'user':'app_user','role':'app_role','adm':'admission','notice':'notificat
  'type':'equipment_type','book':'booking','session':'use_session','cap':'capability',
  'alt':'alternative','repair':'repair','equip':'equipment','fault':'fault_report','outage':'unavailability'}
 for ext in ('xml','png'):
- assert (root/f'diagrams/conceptual_approved.{ext}').read_bytes()==(root.parent/f'ER-модель_final.drawio.{ext}').read_bytes()
+ original=root.parent/f'ER-модель_final.drawio.{ext}'
+ if not original.exists():original=root/f'ER-модель_final.drawio.{ext}'
+ assert (root/f'diagrams/conceptual_approved.{ext}').read_bytes()==original.read_bytes()
 model=json.loads((root/'docs/datalogical.json').read_text());tables={t['name']:t for t in model['tables']}
 approved=E.parse(root/'diagrams/conceptual_approved.xml').getroot()
 entities={c.get('id') for c in approved.iter('mxCell') if c.get('id') in names}
@@ -29,5 +31,20 @@ for c in links:
 assert len(links)==20 and many==2 and len(tables)==17
 assert any(c['name']=='work_kind' and c['nullable']=='NO' for c in tables['repair']['columns'])
 logical=E.parse(root/'diagrams/logical.xml').getroot()
-assert len([c for c in logical.iter('mxCell') if c.get('edge')=='1'])==len(fks)==27
+visible={c.get('id'):c for c in logical.iter('mxCell') if c.get('vertex')=='1'}
+assert set(visible)==set(names.values())|{'user_role','type_capability'}
+for c in approved.iter('mxCell'):
+ if c.get('id') in names:
+  assert E.tostring(c.find('mxGeometry'))==E.tostring(visible[names[c.get('id')]].find('mxGeometry'))
+represented=set()
+for c in logical.iter('mxCell'):
+ if c.get('edge')!='1':continue
+ for field in c.get('data-fk-fields').split(','):
+  matches=[f for f in fks if f[2]==field and {f[0],f[1]}=={c.get('source'),c.get('target')}]
+  assert len(matches)==1
+  represented.add(matches[0])
+assert represented=={f for f in fks if f[0] in visible and f[1] in visible}
+assert len(represented)==24
+assert len([c for c in logical.iter('mxCell') if c.get('edge')=='1'])==22
+print('PASS: all 13 original box geometries preserved; 15 domain/association tables; all 24 domain FK represented')
 print('PASS: approved originals unchanged; 13 entities; all 20 approved links covered; 2 M:N; 17 tables; 27 FK; mandatory work_kind')

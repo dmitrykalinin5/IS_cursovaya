@@ -4,5 +4,5 @@ Local: 60+4 assertions, recreate 60+4, concurrency 5/5.
 Helios LOCAL simulation: 57+4 assertions, smoke 18/18, concurrency 10/10, adapter 7/7.
 Migration: business data and unrelated fixture preserved; repeat migration/install passed.
 Defense: LOCAL and Helios simulation, six checks each, ROLLBACK.
-Report: 38 pages, XeLaTeX; details in VISUAL_QA.md.
+Report: 35 pages, XeLaTeX; details in VISUAL_QA.md.
 Real Helios PostgreSQL 18.3 updated; 57+4 SQL, 18 smoke, 10 concurrency, 6 demo checks; data preserved; repeat migration/install passed.

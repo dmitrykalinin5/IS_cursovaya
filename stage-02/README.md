@@ -24,10 +24,10 @@
 | `diagrams/conceptual_full.{tex,pdf}` | Исторический вариант до согласования (15 сущностей); для защиты используйте conceptual_approved |
 | `diagrams/conceptual_full.{drawio,xml}` | Исторический вариант до согласования; актуальная версия — conceptual_approved |
 | `diagrams/conceptual_approved.{xml,drawio,png}` | Точные копии согласованных исходников из корня |
-| `diagrams/logical.{drawio,xml}` | Редактируемая полная даталогическая схема: 17 таблиц и 27 FK |
+| `diagrams/logical.{drawio,xml}` | Даталогическая схема с точным расположением согласованных 13 блоков; дополнены две таблицы M:N |
 | `sql/demo/defense.sql` | Живой сценарий защиты в psql, с ROLLBACK |
 | `sql/helios/migrate_approved_model.py` | Генерация миграции старой Helios-схемы, проверок и демонстрации |
-| `diagrams/logical.{tex,mmd,pdf}` | Все таблицы, столбцы, PK/FK и связи |
+| `diagrams/logical.{tex,mmd,pdf}` | Единая предметная схема с исходной расстановкой: 13 согласованных сущностей + 2 таблицы M:N, поля, типы и ключи |
 | `sql/schema/` | DDL, домен диапазонов, ограничения и триггеры |
 | `sql/functions/` | Критические операции PostgreSQL/PLpgSQL |
 | `sql/indexes/` | Индексы; обоснование в docs/INDEXES.md |

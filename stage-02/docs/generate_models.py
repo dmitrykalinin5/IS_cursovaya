@@ -85,52 +85,6 @@ for cell in approved.iter('mxCell'):
         right='o{' if style['endArrow']=='ERmany' else '||'
         con.append(f"  {entity_map[cell.get('source')]} {left}--{right} {entity_map[cell.get('target')]} : связь")
 (root/'diagrams/conceptual.mmd').write_text('\n'.join(con)+'\n')
-# Vector rendering: three thematic sheets with every table and every FK.
-groups=[['app_user','app_role','equipment_type','capability','user_role','equipment','type_capability','admission'],
-        ['booking','alternative','use_session','notification','conflict_event'],
-        ['fault_report','unavailability','repair','audit_event']]
-header=r'''\documentclass[a4paper,landscape,10pt]{article}
-\usepackage{fontspec}\usepackage[russian]{babel}\setmainfont{DejaVu Sans}
-\usepackage[margin=1cm]{geometry}\usepackage{tikz}
-\usetikzlibrary{arrows.meta}\pagestyle{empty}\setlength{\parindent}{0pt}
-\tikzset{tbl/.style={draw,fill=blue!5,text width=5.4cm,align=left,font=\fontsize{8}{11}\selectfont,inner sep=7pt},fk/.style={-Latex,thick},lab/.style={fill=white,font=\scriptsize,inner sep=2pt}}
-\begin{document}
-'''
-parts=[header]
-for gi,group in enumerate(groups):
-    if gi:parts.append(r'\newpage')
-    parts.append(r'\begin{center}\Large Даталогическая модель: '+['каталог и допуски','бронирование и использование','технические работы и аудит'][gi]+r'\end{center}')
-    parts.append('PK — первичный ключ; FK — внешний ключ; NN — NOT NULL. Стрелка направлена от FK к родителю. Все FK: RESTRICT / RESTRICT.')
-    parts.append(r'\begin{center}\begin{tikzpicture}')
-    for i,name in enumerate(group):
-        t=tables[name]; x=(i%4)*6.6; y=-(i//4)*7.6
-        if gi==1: x,y={'booking':(6.6,0),'alternative':(0,-7.6),'use_session':(6.6,-7.6),'notification':(13.2,-7.6),'conflict_event':(19.8,0)}[name]
-        if gi==2: x,y={'fault_report':(0,0),'unavailability':(6.6,-7.6),'repair':(13.2,0),'audit_event':(19.8,0)}[name]
-        pk=' '.join(c['definition'] for c in t['constraints'] if c['kind']=='p')
-        fks={re.search(r'FOREIGN KEY \((.*?)\)',c['definition']).group(1): re.search(r'REFERENCES ([\w.]+)',c['definition']).group(1).split('.')[-1] for c in t['constraints'] if c['kind']=='f'}
-        body=[r'\textbf{'+tex(name)+'}'+r'\\\hrulefill\\']
-        for c in t['columns']:
-            tags=[]
-            if re.search(r'\b'+c['name']+r'\b',pk):tags.append('PK')
-            if c['name'] in fks:tags.append('FK')
-            if c['nullable']=='NO':tags.append('NN')
-            typ=c['udt'] if c['type']=='USER-DEFINED' else {'timestamp with time zone':'timestamptz','boolean':'bool','character varying':'varchar'}.get(c['type'],c['type'])
-            body.append(tex(c['name'])+' : '+tex(typ)+' '+','.join(tags)+r'\\')
-        parts.append(f'\\node[tbl] ({name}) at ({x},{y}) '+'{'+'\n'.join(body)+'};')
-    # Only local lines; references outside sheet listed below, so no cross-sheet ambiguity.
-    for fk in m['foreign_keys']:
-        src=fk['from'].split('.')[-1];dst=fk['to'].split('.')[-1]
-        if src not in group or dst not in group:continue
-        field=re.search(r'FOREIGN KEY \((.*?)\)',fk['definition']).group(1)
-        # Keep arrows in wide vertical/horizontal gaps with short column labels.
-        parts.append(f'\\draw[fk] ({src}) -- ({dst});')
-    parts.append(r'\end{tikzpicture}\end{center}')
-    outside=[]
-    for fk in m['foreign_keys']:
-        src=fk['from'].split('.')[-1]; dst=fk['to'].split('.')[-1]
-        if src in group:
-            field=re.search(r'FOREIGN KEY \((.*?)\)',fk['definition']).group(1)
-            outside.append(tex(src+'.'+field)+' → '+tex(dst+'.id'))
-    if outside:parts.append(r'\small\raggedright Все FK листа (включая внешние): '+r'; \allowbreak '.join(outside)+'.')
-parts.append(r'\end{document}')
-(root/'diagrams/logical.tex').write_text('\n'.join(parts))
+# A single full diagram is generated together with the draw.io source.
+import subprocess,sys
+subprocess.run([sys.executable,str(root/'docs/generate_drawio.py')],check=True)

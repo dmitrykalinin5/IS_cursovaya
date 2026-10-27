@@ -232,9 +232,9 @@ $[start,end)$; соседние интервалы допустимы. Доме�
 \code{timestamptz} сохраняет момент, а не исходное написание часового пояса.
 При отображении применяется зона лаборатории \code{Europe/Moscow}; два ввода
 \code{10:00+03} и \code{07:00Z} обозначают одинаковое время.
-Все 27 FK имеют ON DELETE RESTRICT и ON UPDATE RESTRICT. Идентификаторы
-не изменяются; вместо удаления используется архивирование, отзыв, отмена или
-закрытие. Полный перечень полей, NULL, default и ограничений дан в приложении А.
+Все 27 FK используют RESTRICT при удалении и обновлении. Идентификаторы
+неизменяемы; история сохраняется через архивирование, отзыв, отмену или закрытие.
+Полный словарь полей и ограничений приведён в приложении А.
 
 \clearpage
 \includepdf[pages=-,fitpaper=true,pagecommand={\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]\node[anchor=south] at ([yshift=5mm]current page.south){\thepage};\end{tikzpicture}}]{diagrams/logical.pdf}
