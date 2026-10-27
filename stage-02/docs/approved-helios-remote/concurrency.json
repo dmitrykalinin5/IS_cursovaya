@@ -1,0 +1,83 @@
+{
+  "fixture": "LR-PROBE-ab4522af6ec2",
+  "cleanup": "cancelled and archived; audited history retained",
+  "results": [
+    {
+      "test": "HC01 API overlap",
+      "isolation": "READ COMMITTED",
+      "first": "commit",
+      "second": "23P01",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC02 direct INSERT overlap",
+      "isolation": "READ COMMITTED",
+      "first": "commit",
+      "second": "23P01",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC03 API stale snapshot",
+      "isolation": "REPEATABLE READ",
+      "first": "commit",
+      "second": "40001",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC04 direct INSERT stale snapshot",
+      "isolation": "REPEATABLE READ",
+      "first": "commit",
+      "second": "40001",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC05 direct UPDATE overlap",
+      "isolation": "READ COMMITTED",
+      "first": "commit",
+      "second": "23P01",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC06 direct UPDATE stale snapshot",
+      "isolation": "REPEATABLE READ",
+      "first": "commit",
+      "second": "40001",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC07 outage before booking",
+      "isolation": "READ COMMITTED",
+      "first": "commit",
+      "second": "23514",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC08 booking before outage",
+      "isolation": "READ COMMITTED",
+      "first": "commit",
+      "second": "ok",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC09 rollback releases slot",
+      "isolation": "READ COMMITTED",
+      "first": "rollback",
+      "second": "ok",
+      "observed_lock_wait": true,
+      "invariant": "PASS"
+    },
+    {
+      "test": "HC10 multi-row INSERT overlap",
+      "second": "23P01",
+      "invariant": "PASS"
+    }
+  ]
+}

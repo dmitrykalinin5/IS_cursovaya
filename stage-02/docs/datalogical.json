@@ -691,6 +691,21 @@
             ],
             "constraints": [
                 {
+                    "kind": "n",
+                    "name": "booking_user_id_not_null",
+                    "definition": "NOT NULL user_id"
+                },
+                {
+                    "kind": "n",
+                    "name": "booking_equipment_id_not_null",
+                    "definition": "NOT NULL equipment_id"
+                },
+                {
+                    "kind": "n",
+                    "name": "booking_capability_id_not_null",
+                    "definition": "NOT NULL capability_id"
+                },
+                {
                     "kind": "c",
                     "name": "booking_period_check",
                     "definition": "CHECK ((NOT upper_inf((period)::tstzrange)))"
@@ -709,21 +724,6 @@
                     "kind": "n",
                     "name": "booking_id_not_null",
                     "definition": "NOT NULL id"
-                },
-                {
-                    "kind": "n",
-                    "name": "booking_user_id_not_null",
-                    "definition": "NOT NULL user_id"
-                },
-                {
-                    "kind": "n",
-                    "name": "booking_equipment_id_not_null",
-                    "definition": "NOT NULL equipment_id"
-                },
-                {
-                    "kind": "n",
-                    "name": "booking_capability_id_not_null",
-                    "definition": "NOT NULL capability_id"
                 },
                 {
                     "kind": "n",
@@ -841,6 +841,26 @@
             ],
             "constraints": [
                 {
+                    "kind": "c",
+                    "name": "alternative_period_check",
+                    "definition": "CHECK ((NOT upper_inf((period)::tstzrange)))"
+                },
+                {
+                    "kind": "c",
+                    "name": "alternative_priority_check",
+                    "definition": "CHECK (((priority >= 1) AND (priority <= 3)))"
+                },
+                {
+                    "kind": "c",
+                    "name": "alternative_state_check",
+                    "definition": "CHECK ((state = ANY (ARRAY['offered'::text, 'chosen'::text, 'obsolete'::text])))"
+                },
+                {
+                    "kind": "n",
+                    "name": "alternative_id_not_null",
+                    "definition": "NOT NULL id"
+                },
+                {
                     "kind": "n",
                     "name": "alternative_booking_id_not_null",
                     "definition": "NOT NULL booking_id"
@@ -864,26 +884,6 @@
                     "kind": "n",
                     "name": "alternative_state_not_null",
                     "definition": "NOT NULL state"
-                },
-                {
-                    "kind": "c",
-                    "name": "alternative_period_check",
-                    "definition": "CHECK ((NOT upper_inf((period)::tstzrange)))"
-                },
-                {
-                    "kind": "c",
-                    "name": "alternative_priority_check",
-                    "definition": "CHECK (((priority >= 1) AND (priority <= 3)))"
-                },
-                {
-                    "kind": "c",
-                    "name": "alternative_state_check",
-                    "definition": "CHECK ((state = ANY (ARRAY['offered'::text, 'chosen'::text, 'obsolete'::text])))"
-                },
-                {
-                    "kind": "n",
-                    "name": "alternative_id_not_null",
-                    "definition": "NOT NULL id"
                 },
                 {
                     "kind": "n",
@@ -1255,6 +1255,15 @@
                     "nullable": "NO"
                 },
                 {
+                    "udt": "text",
+                    "name": "work_kind",
+                    "type": "text",
+                    "domain": null,
+                    "default": null,
+                    "identity": "NO",
+                    "nullable": "NO"
+                },
+                {
                     "udt": "tstzrange",
                     "name": "period",
                     "type": "tstzrange",
@@ -1276,6 +1285,11 @@
             "constraints": [
                 {
                     "kind": "c",
+                    "name": "repair_work_kind_check",
+                    "definition": "CHECK ((length(TRIM(BOTH FROM work_kind)) > 0))"
+                },
+                {
+                    "kind": "c",
                     "name": "repair_period_check",
                     "definition": "CHECK ((NOT upper_inf((period)::tstzrange)))"
                 },
@@ -1293,6 +1307,11 @@
                     "kind": "n",
                     "name": "repair_performed_by_not_null",
                     "definition": "NOT NULL performed_by"
+                },
+                {
+                    "kind": "n",
+                    "name": "repair_work_kind_not_null",
+                    "definition": "NOT NULL work_kind"
                 },
                 {
                     "kind": "n",
@@ -1919,6 +1938,61 @@
     ],
     "triggers": [
         {
+            "name": "booking_guard",
+            "table": "booking",
+            "definition": "CREATE TRIGGER booking_guard BEFORE INSERT OR DELETE OR UPDATE ON labreserve.booking FOR EACH ROW EXECUTE FUNCTION labreserve.check_booking()"
+        },
+        {
+            "name": "unavailability_guard",
+            "table": "unavailability",
+            "definition": "CREATE TRIGGER unavailability_guard BEFORE INSERT OR DELETE OR UPDATE ON labreserve.unavailability FOR EACH ROW EXECUTE FUNCTION labreserve.check_unavailability()"
+        },
+        {
+            "name": "unavailability_impact",
+            "table": "unavailability",
+            "definition": "CREATE TRIGGER unavailability_impact AFTER INSERT OR UPDATE ON labreserve.unavailability FOR EACH ROW EXECUTE FUNCTION labreserve.impact_bookings()"
+        },
+        {
+            "name": "session_guard",
+            "table": "use_session",
+            "definition": "CREATE TRIGGER session_guard BEFORE INSERT OR DELETE OR UPDATE ON labreserve.use_session FOR EACH ROW EXECUTE FUNCTION labreserve.check_session()"
+        },
+        {
+            "name": "session_complete",
+            "table": "use_session",
+            "definition": "CREATE TRIGGER session_complete AFTER UPDATE ON labreserve.use_session FOR EACH ROW EXECUTE FUNCTION labreserve.complete_session()"
+        },
+        {
+            "name": "audit_immutable",
+            "table": "audit_event",
+            "definition": "CREATE TRIGGER audit_immutable BEFORE DELETE OR UPDATE ON labreserve.audit_event FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
+        },
+        {
+            "name": "conflict_immutable",
+            "table": "conflict_event",
+            "definition": "CREATE TRIGGER conflict_immutable BEFORE DELETE OR UPDATE ON labreserve.conflict_event FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
+        },
+        {
+            "name": "repair_immutable",
+            "table": "repair",
+            "definition": "CREATE TRIGGER repair_immutable BEFORE DELETE OR UPDATE ON labreserve.repair FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
+        },
+        {
+            "name": "repair_guard",
+            "table": "repair",
+            "definition": "CREATE TRIGGER repair_guard BEFORE INSERT ON labreserve.repair FOR EACH ROW EXECUTE FUNCTION labreserve.technical_guard()"
+        },
+        {
+            "name": "fault_guard",
+            "table": "fault_report",
+            "definition": "CREATE TRIGGER fault_guard BEFORE INSERT OR UPDATE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.technical_guard()"
+        },
+        {
+            "name": "fault_no_delete",
+            "table": "fault_report",
+            "definition": "CREATE TRIGGER fault_no_delete BEFORE DELETE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
+        },
+        {
             "name": "audit_app_user",
             "table": "app_user",
             "definition": "CREATE TRIGGER audit_app_user AFTER INSERT OR DELETE OR UPDATE ON labreserve.app_user FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
@@ -1934,24 +2008,19 @@
             "definition": "CREATE TRIGGER audit_equipment_type AFTER INSERT OR DELETE OR UPDATE ON labreserve.equipment_type FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
         },
         {
-            "name": "audit_type_capability",
-            "table": "type_capability",
-            "definition": "CREATE TRIGGER audit_type_capability AFTER INSERT OR DELETE OR UPDATE ON labreserve.type_capability FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
             "name": "audit_capability",
             "table": "capability",
             "definition": "CREATE TRIGGER audit_capability AFTER INSERT OR DELETE OR UPDATE ON labreserve.capability FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
         },
         {
+            "name": "audit_type_capability",
+            "table": "type_capability",
+            "definition": "CREATE TRIGGER audit_type_capability AFTER INSERT OR DELETE OR UPDATE ON labreserve.type_capability FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
+        },
+        {
             "name": "audit_equipment",
             "table": "equipment",
             "definition": "CREATE TRIGGER audit_equipment AFTER INSERT OR DELETE OR UPDATE ON labreserve.equipment FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "admission_guard",
-            "table": "admission",
-            "definition": "CREATE TRIGGER admission_guard BEFORE DELETE OR UPDATE ON labreserve.admission FOR EACH ROW EXECUTE FUNCTION labreserve.admission_history()"
         },
         {
             "name": "audit_admission",
@@ -1964,29 +2033,9 @@
             "definition": "CREATE TRIGGER audit_booking AFTER INSERT OR DELETE OR UPDATE ON labreserve.booking FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
         },
         {
-            "name": "booking_guard",
-            "table": "booking",
-            "definition": "CREATE TRIGGER booking_guard BEFORE INSERT OR DELETE OR UPDATE ON labreserve.booking FOR EACH ROW EXECUTE FUNCTION labreserve.check_booking()"
-        },
-        {
             "name": "audit_alternative",
             "table": "alternative",
             "definition": "CREATE TRIGGER audit_alternative AFTER INSERT OR DELETE OR UPDATE ON labreserve.alternative FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_fault_report",
-            "table": "fault_report",
-            "definition": "CREATE TRIGGER audit_fault_report AFTER INSERT OR DELETE OR UPDATE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "fault_no_delete",
-            "table": "fault_report",
-            "definition": "CREATE TRIGGER fault_no_delete BEFORE DELETE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
-        },
-        {
-            "name": "fault_guard",
-            "table": "fault_report",
-            "definition": "CREATE TRIGGER fault_guard BEFORE INSERT OR UPDATE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.technical_guard()"
         },
         {
             "name": "audit_unavailability",
@@ -1994,14 +2043,9 @@
             "definition": "CREATE TRIGGER audit_unavailability AFTER INSERT OR DELETE OR UPDATE ON labreserve.unavailability FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
         },
         {
-            "name": "unavailability_impact",
-            "table": "unavailability",
-            "definition": "CREATE TRIGGER unavailability_impact AFTER INSERT OR UPDATE ON labreserve.unavailability FOR EACH ROW EXECUTE FUNCTION labreserve.impact_bookings()"
-        },
-        {
-            "name": "unavailability_guard",
-            "table": "unavailability",
-            "definition": "CREATE TRIGGER unavailability_guard BEFORE INSERT OR DELETE OR UPDATE ON labreserve.unavailability FOR EACH ROW EXECUTE FUNCTION labreserve.check_unavailability()"
+            "name": "audit_fault_report",
+            "table": "fault_report",
+            "definition": "CREATE TRIGGER audit_fault_report AFTER INSERT OR DELETE OR UPDATE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
         },
         {
             "name": "audit_repair",
@@ -2009,56 +2053,31 @@
             "definition": "CREATE TRIGGER audit_repair AFTER INSERT OR DELETE OR UPDATE ON labreserve.repair FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
         },
         {
-            "name": "repair_guard",
-            "table": "repair",
-            "definition": "CREATE TRIGGER repair_guard BEFORE INSERT ON labreserve.repair FOR EACH ROW EXECUTE FUNCTION labreserve.technical_guard()"
-        },
-        {
-            "name": "repair_immutable",
-            "table": "repair",
-            "definition": "CREATE TRIGGER repair_immutable BEFORE DELETE OR UPDATE ON labreserve.repair FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
-        },
-        {
             "name": "audit_use_session",
             "table": "use_session",
             "definition": "CREATE TRIGGER audit_use_session AFTER INSERT OR DELETE OR UPDATE ON labreserve.use_session FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
         },
         {
-            "name": "session_complete",
-            "table": "use_session",
-            "definition": "CREATE TRIGGER session_complete AFTER UPDATE ON labreserve.use_session FOR EACH ROW EXECUTE FUNCTION labreserve.complete_session()"
-        },
-        {
-            "name": "session_guard",
-            "table": "use_session",
-            "definition": "CREATE TRIGGER session_guard BEFORE INSERT OR DELETE OR UPDATE ON labreserve.use_session FOR EACH ROW EXECUTE FUNCTION labreserve.check_session()"
-        },
-        {
-            "name": "audit_immutable",
-            "table": "audit_event",
-            "definition": "CREATE TRIGGER audit_immutable BEFORE DELETE OR UPDATE ON labreserve.audit_event FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
-        },
-        {
-            "name": "conflict_immutable",
-            "table": "conflict_event",
-            "definition": "CREATE TRIGGER conflict_immutable BEFORE DELETE OR UPDATE ON labreserve.conflict_event FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
+            "name": "admission_guard",
+            "table": "admission",
+            "definition": "CREATE TRIGGER admission_guard BEFORE DELETE OR UPDATE ON labreserve.admission FOR EACH ROW EXECUTE FUNCTION labreserve.admission_history()"
         }
     ],
     "functions": [
         {
             "result": "trigger",
             "definer": false,
-            "signature": "labreserve.complete_session()"
+            "signature": "labreserve.immutable_history()"
         },
         {
-            "result": "void",
-            "definer": false,
-            "signature": "labreserve.assert_owner(bigint,bigint)"
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.report_fault(bigint,bigint,text)"
         },
         {
-            "result": "void",
-            "definer": false,
-            "signature": "labreserve.lock_equipment(bigint)"
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.open_session(bigint,bigint)"
         },
         {
             "result": "boolean",
@@ -2076,14 +2095,9 @@
             "signature": "labreserve.check_booking()"
         },
         {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.grant_admission(bigint,bigint,bigint,timestamp with time zone,timestamp with time zone,text)"
-        },
-        {
-            "result": "SETOF tstzrange",
+            "result": "SETOF labreserve.equipment",
             "definer": false,
-            "signature": "labreserve.free_intervals(bigint,tstzrange,bigint)"
+            "signature": "labreserve.equivalent_equipment(bigint,bigint,tstzrange)"
         },
         {
             "result": "trigger",
@@ -2096,11 +2110,6 @@
             "signature": "labreserve.impact_bookings()"
         },
         {
-            "result": "void",
-            "definer": true,
-            "signature": "labreserve.cancel_booking(bigint,bigint,text)"
-        },
-        {
             "result": "trigger",
             "definer": false,
             "signature": "labreserve.check_session()"
@@ -2108,7 +2117,27 @@
         {
             "result": "trigger",
             "definer": false,
-            "signature": "labreserve.immutable_history()"
+            "signature": "labreserve.complete_session()"
+        },
+        {
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.register_unavailability(bigint,bigint,text,timestamp with time zone,timestamp with time zone,text,bigint)"
+        },
+        {
+            "result": "void",
+            "definer": true,
+            "signature": "labreserve.edit_maintenance(bigint,bigint,timestamp with time zone,timestamp with time zone,text,boolean)"
+        },
+        {
+            "result": "text",
+            "definer": false,
+            "signature": "labreserve.equipment_state(bigint,timestamp with time zone)"
+        },
+        {
+            "result": "void",
+            "definer": false,
+            "signature": "labreserve.lock_equipment(bigint)"
         },
         {
             "result": "trigger",
@@ -2126,9 +2155,14 @@
             "signature": "labreserve.admission_history()"
         },
         {
-            "result": "SETOF labreserve.equipment",
+            "result": "void",
             "definer": false,
-            "signature": "labreserve.equivalent_equipment(bigint,bigint,tstzrange)"
+            "signature": "labreserve.assert_owner(bigint,bigint)"
+        },
+        {
+            "result": "SETOF tstzrange",
+            "definer": false,
+            "signature": "labreserve.free_intervals(bigint,tstzrange,bigint)"
         },
         {
             "result": "TABLE(equipment_id bigint, period tstzrange, priority smallint)",
@@ -2153,37 +2187,17 @@
         {
             "result": "void",
             "definer": true,
-            "signature": "labreserve.select_alternative(bigint,bigint)"
-        },
-        {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.report_fault(bigint,bigint,text)"
-        },
-        {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.register_unavailability(bigint,bigint,text,timestamp with time zone,timestamp with time zone,text,bigint)"
+            "signature": "labreserve.cancel_booking(bigint,bigint,text)"
         },
         {
             "result": "void",
             "definer": true,
-            "signature": "labreserve.edit_maintenance(bigint,bigint,timestamp with time zone,timestamp with time zone,text,boolean)"
-        },
-        {
-            "result": "text",
-            "definer": false,
-            "signature": "labreserve.equipment_state(bigint,timestamp with time zone)"
+            "signature": "labreserve.select_alternative(bigint,bigint)"
         },
         {
             "result": "text",
             "definer": true,
             "signature": "labreserve.resolve_unavailability(bigint,bigint,text)"
-        },
-        {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.open_session(bigint,bigint)"
         },
         {
             "result": "void",
@@ -2199,6 +2213,11 @@
             "result": "TABLE(equipment_id bigint, planned_seconds numeric, actual_seconds numeric, downtime_seconds numeric, utilization_percent numeric, conflicts bigint)",
             "definer": false,
             "signature": "labreserve.equipment_metrics(tstzrange)"
+        },
+        {
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.grant_admission(bigint,bigint,bigint,timestamp with time zone,timestamp with time zone,text)"
         },
         {
             "result": "void",

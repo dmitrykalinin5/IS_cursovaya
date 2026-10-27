@@ -15,14 +15,14 @@ purpose={
 'equipment':'Инвентарная единица, характеристики, архив',
 'admission':'Допуск к типу; период, основание, автор и отзыв',
 'booking':'Плановый интервал, владелец, цель и жизненный цикл',
-'alternative':'Историческое предложение переноса и выбор',
+'alternative':'Предложение переноса: интервал, приоритет и статус',
 'fault_report':'Первичное сообщение и результат проверки',
-'unavailability':'Период ТО либо подтверждённой неисправности',
-'repair':'Исполнитель и результат технической работы',
+'unavailability':'Техническое событие: ТО либо подтверждённая неисправность',
+'repair':'Техническая работа: вид, исполнитель, интервал и результат',
 'use_session':'Фактические начало и окончание работы',
 'notification':'Внутрисистемное уведомление и прочтение',
-'audit_event':'Неизменяемый журнал значимых изменений',
-'conflict_event':'Отклонённый запрос для статистики конфликтов'}
+'audit_event':'Служебный журнал значимых изменений (вне инфологической модели)',
+'conflict_event':'Служебный журнал отказов для статистики (вне инфологической модели)'}
 (root/'docs/entities.json').write_text(json.dumps(purpose,ensure_ascii=False,indent=2))
 def tex(s):
     chars={'\\':r'\textbackslash{}','_':r'\_\allowbreak{}','%':r'\%','&':r'\&','#':r'\#','{':r'\{','}':r'\}'}
@@ -68,16 +68,22 @@ for fk in m['foreign_keys']:
     unique=any(c['kind']=='u' and c['definition']==f'UNIQUE ({field})' for c in tables[src]['constraints'])
     er.append(f'  {dst} '+('o|' if nullable else '||')+'--'+('o|' if unique else 'o{')+f' {src} : "{field}"')
 (root/'diagrams/logical.mmd').write_text('\n'.join(er)+'\n')
-# Conceptual graph explicitly replaces association tables by M:N edges.
-concept=[line for line in er if not any(n in line for n in ['user_role','type_capability'])]
-# Write separately as concise conceptual diagram, major attributes only.
+# The approved XML is the source of the conceptual graph; technical logs are excluded.
+import xml.etree.ElementTree as ET
+approved=ET.parse(root/'diagrams/conceptual_approved.xml').getroot()
+entity_map={'user':'app_user','role':'app_role','adm':'admission','notice':'notification',
+ 'type':'equipment_type','book':'booking','session':'use_session','cap':'capability',
+ 'alt':'alternative','repair':'repair','equip':'equipment','fault':'fault_report','outage':'unavailability'}
 con=['erDiagram']
-for name,t in tables.items():
-    if name in ('user_role','type_capability'):continue
-    con += [f'  {name} {{']+[f"    {c['udt']} {c['name']}" for c in t['columns'][:5]]+['  }']
-for line in er:
-    if '--' in line and not any(n in line for n in ['user_role','type_capability']): con.append(line)
-con += ['  app_user }o--o{ app_role : "M:N роли"','  equipment_type }o--o{ capability : "M:N функции"']
+for cell in approved.iter('mxCell'):
+    if cell.get('id') in entity_map:
+        name=entity_map[cell.get('id')]
+        con += [f'  {name} {{']+[f"    {c['udt']} {c['name']}" for c in tables[name]['columns']]+['  }']
+    if cell.get('edge')=='1':
+        style=dict(part.split('=',1) for part in cell.get('style','').split(';') if '=' in part)
+        left='}o' if style['startArrow']=='ERmany' else '||'
+        right='o{' if style['endArrow']=='ERmany' else '||'
+        con.append(f"  {entity_map[cell.get('source')]} {left}--{right} {entity_map[cell.get('target')]} : связь")
 (root/'diagrams/conceptual.mmd').write_text('\n'.join(con)+'\n')
 # Vector rendering: three thematic sheets with every table and every FK.
 groups=[['app_user','app_role','equipment_type','capability','user_role','equipment','type_capability','admission'],
@@ -125,6 +131,6 @@ for gi,group in enumerate(groups):
         if src in group:
             field=re.search(r'FOREIGN KEY \((.*?)\)',fk['definition']).group(1)
             outside.append(tex(src+'.'+field)+' → '+tex(dst+'.id'))
-    if outside:parts.append(r'\small Все FK листа (включая внешние): '+r'; \allowbreak '.join(outside)+'.')
+    if outside:parts.append(r'\small\raggedright Все FK листа (включая внешние): '+r'; \allowbreak '.join(outside)+'.')
 parts.append(r'\end{document}')
 (root/'diagrams/logical.tex').write_text('\n'.join(parts))

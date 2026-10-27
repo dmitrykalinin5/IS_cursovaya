@@ -1,29 +1,14 @@
 erDiagram
+  app_role {
+    text code
+  }
   app_user {
     int8 id
     text login
     text full_name
     text password_hash
     bool active
-  }
-  app_role {
-    text code
-  }
-  equipment_type {
-    int8 id
-    text name
-    bool archived
-  }
-  capability {
-    int8 id
-    text name
-  }
-  equipment {
-    int8 id
-    int8 type_id
-    text inventory_no
-    text name
-    jsonb characteristics
+    timestamptz created_at
   }
   admission {
     int8 id
@@ -31,6 +16,23 @@ erDiagram
     int8 type_id
     tstzrange valid_during
     text basis
+    int8 granted_by
+    timestamptz revoked_at
+    timestamptz created_at
+  }
+  notification {
+    int8 id
+    int8 user_id
+    int8 booking_id
+    text kind
+    text message
+    timestamptz created_at
+    timestamptz read_at
+  }
+  equipment_type {
+    int8 id
+    text name
+    bool archived
   }
   booking {
     int8 id
@@ -38,34 +40,11 @@ erDiagram
     int8 equipment_id
     int8 capability_id
     tstzrange period
-  }
-  alternative {
-    int8 id
-    int8 booking_id
-    int8 equipment_id
-    tstzrange period
-    int2 priority
-  }
-  fault_report {
-    int8 id
-    int8 equipment_id
-    int8 reported_by
-    text description
-    timestamptz reported_at
-  }
-  unavailability {
-    int8 id
-    int8 equipment_id
-    text kind
-    tstzrange period
-    text reason
-  }
-  repair {
-    int8 id
-    int8 unavailability_id
-    int8 performed_by
-    tstzrange period
-    text result
+    text purpose
+    text status
+    timestamptz cancelled_at
+    text cancel_reason
+    timestamptz created_at
   }
   use_session {
     int8 id
@@ -74,49 +53,74 @@ erDiagram
     timestamptz ended_at
     text close_comment
   }
-  notification {
+  capability {
     int8 id
-    int8 user_id
+    text name
+  }
+  alternative {
+    int8 id
     int8 booking_id
-    text kind
-    text message
-  }
-  audit_event {
-    int8 id
-    int8 actor_id
-    text table_name
-    jsonb record_key
-    text action
-  }
-  conflict_event {
-    int8 id
-    int8 user_id
     int8 equipment_id
-    tstzrange requested_period
-    text error_code
+    tstzrange period
+    int2 priority
+    text state
+    timestamptz created_at
   }
-  equipment_type ||--o{ equipment : "type_id"
-  app_user ||--o{ admission : "user_id"
-  equipment_type ||--o{ admission : "type_id"
-  app_user ||--o{ admission : "granted_by"
-  app_user ||--o{ booking : "user_id"
-  equipment ||--o{ booking : "equipment_id"
-  capability ||--o{ booking : "capability_id"
-  booking ||--o{ alternative : "booking_id"
-  equipment ||--o{ alternative : "equipment_id"
-  equipment ||--o{ fault_report : "equipment_id"
-  app_user ||--o{ fault_report : "reported_by"
-  equipment ||--o{ unavailability : "equipment_id"
-  fault_report o|--o| unavailability : "fault_report_id"
-  app_user ||--o{ unavailability : "created_by"
-  app_user o|--o{ unavailability : "resolved_by"
-  unavailability ||--o{ repair : "unavailability_id"
-  app_user ||--o{ repair : "performed_by"
-  booking ||--o| use_session : "booking_id"
-  app_user ||--o{ notification : "user_id"
-  booking o|--o{ notification : "booking_id"
-  app_user o|--o{ audit_event : "actor_id"
-  app_user ||--o{ conflict_event : "user_id"
-  equipment ||--o{ conflict_event : "equipment_id"
-  app_user }o--o{ app_role : "M:N роли"
-  equipment_type }o--o{ capability : "M:N функции"
+  repair {
+    int8 id
+    int8 unavailability_id
+    int8 performed_by
+    text work_kind
+    tstzrange period
+    text result
+  }
+  equipment {
+    int8 id
+    int8 type_id
+    text inventory_no
+    text name
+    jsonb characteristics
+    bool archived
+    int8 schedule_revision
+  }
+  fault_report {
+    int8 id
+    int8 equipment_id
+    int8 reported_by
+    text description
+    timestamptz reported_at
+    text state
+  }
+  unavailability {
+    int8 id
+    int8 equipment_id
+    text kind
+    tstzrange period
+    text reason
+    int8 fault_report_id
+    int8 created_by
+    text status
+    int8 resolved_by
+    timestamptz resolved_at
+    timestamptz created_at
+  }
+  app_user }o--o{ app_role : связь
+  app_user ||--o{ admission : связь
+  admission }o--|| equipment_type : связь
+  equipment_type }o--o{ capability : связь
+  equipment_type ||--o{ equipment : связь
+  app_user ||--o{ booking : связь
+  equipment ||--o{ booking : связь
+  capability ||--o{ booking : связь
+  booking ||--o{ alternative : связь
+  equipment ||--o{ alternative : связь
+  booking ||--|| use_session : связь
+  app_user ||--o{ notification : связь
+  booking ||--o{ notification : связь
+  app_user ||--o{ fault_report : связь
+  equipment ||--o{ fault_report : связь
+  fault_report ||--|| unavailability : связь
+  equipment ||--o{ unavailability : связь
+  unavailability ||--o{ repair : связь
+  app_user ||--o{ unavailability : связь
+  app_user ||--o{ repair : связь

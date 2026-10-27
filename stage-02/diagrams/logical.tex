@@ -56,7 +56,7 @@ created\_\allowbreak{}at : timestamptz NN\\};
 \draw[fk] (admission) -- (equipment_type);
 \draw[fk] (admission) -- (app_user);
 \end{tikzpicture}\end{center}
-\small Все FK листа (включая внешние): user\_\allowbreak{}role.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak user\_\allowbreak{}role.role\_\allowbreak{}code → app\_\allowbreak{}role.id; \allowbreak type\_\allowbreak{}capability.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak type\_\allowbreak{}capability.capability\_\allowbreak{}id → capability.id; \allowbreak equipment.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak admission.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak admission.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak admission.granted\_\allowbreak{}by → app\_\allowbreak{}user.id.
+\small\raggedright Все FK листа (включая внешние): user\_\allowbreak{}role.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak user\_\allowbreak{}role.role\_\allowbreak{}code → app\_\allowbreak{}role.id; \allowbreak type\_\allowbreak{}capability.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak type\_\allowbreak{}capability.capability\_\allowbreak{}id → capability.id; \allowbreak equipment.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak admission.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak admission.type\_\allowbreak{}id → equipment\_\allowbreak{}type.id; \allowbreak admission.granted\_\allowbreak{}by → app\_\allowbreak{}user.id.
 \newpage
 \begin{center}\Large Даталогическая модель: бронирование и использование\end{center}
 PK — первичный ключ; FK — внешний ключ; NN — NOT NULL. Стрелка направлена от FK к родителю. Все FK: RESTRICT / RESTRICT.
@@ -105,7 +105,7 @@ occurred\_\allowbreak{}at : timestamptz NN\\};
 \draw[fk] (use_session) -- (booking);
 \draw[fk] (notification) -- (booking);
 \end{tikzpicture}\end{center}
-\small Все FK листа (включая внешние): booking.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak booking.equipment\_\allowbreak{}id → equipment.id; \allowbreak booking.capability\_\allowbreak{}id → capability.id; \allowbreak alternative.booking\_\allowbreak{}id → booking.id; \allowbreak alternative.equipment\_\allowbreak{}id → equipment.id; \allowbreak use\_\allowbreak{}session.booking\_\allowbreak{}id → booking.id; \allowbreak notification.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak notification.booking\_\allowbreak{}id → booking.id; \allowbreak conflict\_\allowbreak{}event.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak conflict\_\allowbreak{}event.equipment\_\allowbreak{}id → equipment.id.
+\small\raggedright Все FK листа (включая внешние): booking.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak booking.equipment\_\allowbreak{}id → equipment.id; \allowbreak booking.capability\_\allowbreak{}id → capability.id; \allowbreak alternative.booking\_\allowbreak{}id → booking.id; \allowbreak alternative.equipment\_\allowbreak{}id → equipment.id; \allowbreak use\_\allowbreak{}session.booking\_\allowbreak{}id → booking.id; \allowbreak notification.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak notification.booking\_\allowbreak{}id → booking.id; \allowbreak conflict\_\allowbreak{}event.user\_\allowbreak{}id → app\_\allowbreak{}user.id; \allowbreak conflict\_\allowbreak{}event.equipment\_\allowbreak{}id → equipment.id.
 \newpage
 \begin{center}\Large Даталогическая модель: технические работы и аудит\end{center}
 PK — первичный ключ; FK — внешний ключ; NN — NOT NULL. Стрелка направлена от FK к родителю. Все FK: RESTRICT / RESTRICT.
@@ -133,6 +133,7 @@ created\_\allowbreak{}at : timestamptz NN\\};
 id : bigint PK,NN\\
 unavailability\_\allowbreak{}id : bigint FK,NN\\
 performed\_\allowbreak{}by : bigint FK,NN\\
+work\_\allowbreak{}kind : text NN\\
 period : tstzrange NN\\
 result : text NN\\};
 \node[tbl] (audit_event) at (19.8,0) {\textbf{audit\_\allowbreak{}event}\\\hrulefill\\
@@ -148,5 +149,5 @@ transaction\_\allowbreak{}id : bigint NN\\};
 \draw[fk] (unavailability) -- (fault_report);
 \draw[fk] (repair) -- (unavailability);
 \end{tikzpicture}\end{center}
-\small Все FK листа (включая внешние): fault\_\allowbreak{}report.equipment\_\allowbreak{}id → equipment.id; \allowbreak fault\_\allowbreak{}report.reported\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak unavailability.equipment\_\allowbreak{}id → equipment.id; \allowbreak unavailability.fault\_\allowbreak{}report\_\allowbreak{}id → fault\_\allowbreak{}report.id; \allowbreak unavailability.created\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak unavailability.resolved\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak repair.unavailability\_\allowbreak{}id → unavailability.id; \allowbreak repair.performed\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak audit\_\allowbreak{}event.actor\_\allowbreak{}id → app\_\allowbreak{}user.id.
+\small\raggedright Все FK листа (включая внешние): fault\_\allowbreak{}report.equipment\_\allowbreak{}id → equipment.id; \allowbreak fault\_\allowbreak{}report.reported\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak unavailability.equipment\_\allowbreak{}id → equipment.id; \allowbreak unavailability.fault\_\allowbreak{}report\_\allowbreak{}id → fault\_\allowbreak{}report.id; \allowbreak unavailability.created\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak unavailability.resolved\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak repair.unavailability\_\allowbreak{}id → unavailability.id; \allowbreak repair.performed\_\allowbreak{}by → app\_\allowbreak{}user.id; \allowbreak audit\_\allowbreak{}event.actor\_\allowbreak{}id → app\_\allowbreak{}user.id.
 \end{document}

@@ -166,13 +166,13 @@
 
 Ограничения:
 
+- `booking_user_id_not_null`: `NOT NULL user_id`.
+- `booking_equipment_id_not_null`: `NOT NULL equipment_id`.
+- `booking_capability_id_not_null`: `NOT NULL capability_id`.
 - `booking_period_check`: `CHECK ((NOT upper_inf((period)::tstzrange)))`.
 - `booking_status_check`: `CHECK ((status = ANY (ARRAY['confirmed'::text, 'needs_transfer'::text, 'cancelled'::text, 'completed'::text])))`.
 - `ck_booking_cancel`: `CHECK (((status = 'cancelled'::text) = ((cancelled_at IS NOT NULL) AND (cancel_reason IS NOT NULL))))`.
 - `booking_id_not_null`: `NOT NULL id`.
-- `booking_user_id_not_null`: `NOT NULL user_id`.
-- `booking_equipment_id_not_null`: `NOT NULL equipment_id`.
-- `booking_capability_id_not_null`: `NOT NULL capability_id`.
 - `booking_period_not_null`: `NOT NULL period`.
 - `booking_purpose_not_null`: `NOT NULL purpose`.
 - `booking_status_not_null`: `NOT NULL status`.
@@ -183,7 +183,7 @@
 - `booking_equipment_id_fkey`: `FOREIGN KEY (equipment_id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 - `booking_capability_id_fkey`: `FOREIGN KEY (capability_id) REFERENCES labreserve.capability(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 
-## `alternative` — Историческое предложение переноса и выбор
+## `alternative` — Предложение переноса: интервал, приоритет и статус
 
 | Столбец | Тип | NULL | Значение по умолчанию |
 |---|---|---|---|
@@ -197,15 +197,15 @@
 
 Ограничения:
 
+- `alternative_period_check`: `CHECK ((NOT upper_inf((period)::tstzrange)))`.
+- `alternative_priority_check`: `CHECK (((priority >= 1) AND (priority <= 3)))`.
+- `alternative_state_check`: `CHECK ((state = ANY (ARRAY['offered'::text, 'chosen'::text, 'obsolete'::text])))`.
+- `alternative_id_not_null`: `NOT NULL id`.
 - `alternative_booking_id_not_null`: `NOT NULL booking_id`.
 - `alternative_equipment_id_not_null`: `NOT NULL equipment_id`.
 - `alternative_period_not_null`: `NOT NULL period`.
 - `alternative_priority_not_null`: `NOT NULL priority`.
 - `alternative_state_not_null`: `NOT NULL state`.
-- `alternative_period_check`: `CHECK ((NOT upper_inf((period)::tstzrange)))`.
-- `alternative_priority_check`: `CHECK (((priority >= 1) AND (priority <= 3)))`.
-- `alternative_state_check`: `CHECK ((state = ANY (ARRAY['offered'::text, 'chosen'::text, 'obsolete'::text])))`.
-- `alternative_id_not_null`: `NOT NULL id`.
 - `alternative_created_at_not_null`: `NOT NULL created_at`.
 - `alternative_pkey`: `PRIMARY KEY (id)`.
 - `alternative_booking_id_equipment_id_period_key`: `UNIQUE (booking_id, equipment_id, period)`.
@@ -236,7 +236,7 @@
 - `fault_report_equipment_id_fkey`: `FOREIGN KEY (equipment_id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 - `fault_report_reported_by_fkey`: `FOREIGN KEY (reported_by) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 
-## `unavailability` — Период ТО либо подтверждённой неисправности
+## `unavailability` — Техническое событие: ТО либо подтверждённая неисправность
 
 | Столбец | Тип | NULL | Значение по умолчанию |
 |---|---|---|---|
@@ -274,22 +274,25 @@
 - `unavailability_created_by_fkey`: `FOREIGN KEY (created_by) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 - `unavailability_resolved_by_fkey`: `FOREIGN KEY (resolved_by) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 
-## `repair` — Исполнитель и результат технической работы
+## `repair` — Техническая работа: вид, исполнитель, интервал и результат
 
 | Столбец | Тип | NULL | Значение по умолчанию |
 |---|---|---|---|
 | `id` | `bigint` | NO | `IDENTITY` |
 | `unavailability_id` | `bigint` | NO | `—` |
 | `performed_by` | `bigint` | NO | `—` |
+| `work_kind` | `text` | NO | `—` |
 | `period` | `time_window` | NO | `—` |
 | `result` | `text` | NO | `—` |
 
 Ограничения:
 
+- `repair_work_kind_check`: `CHECK ((length(TRIM(BOTH FROM work_kind)) > 0))`.
 - `repair_period_check`: `CHECK ((NOT upper_inf((period)::tstzrange)))`.
 - `repair_id_not_null`: `NOT NULL id`.
 - `repair_unavailability_id_not_null`: `NOT NULL unavailability_id`.
 - `repair_performed_by_not_null`: `NOT NULL performed_by`.
+- `repair_work_kind_not_null`: `NOT NULL work_kind`.
 - `repair_period_not_null`: `NOT NULL period`.
 - `repair_result_not_null`: `NOT NULL result`.
 - `repair_pkey`: `PRIMARY KEY (id)`.
@@ -340,7 +343,7 @@
 - `notification_user_id_fkey`: `FOREIGN KEY (user_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 - `notification_booking_id_fkey`: `FOREIGN KEY (booking_id) REFERENCES labreserve.booking(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 
-## `audit_event` — Неизменяемый журнал значимых изменений
+## `audit_event` — Служебный журнал значимых изменений (вне инфологической модели)
 
 | Столбец | Тип | NULL | Значение по умолчанию |
 |---|---|---|---|
@@ -365,7 +368,7 @@
 - `audit_event_pkey`: `PRIMARY KEY (id)`.
 - `audit_event_actor_id_fkey`: `FOREIGN KEY (actor_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 
-## `conflict_event` — Отклонённый запрос для статистики конфликтов
+## `conflict_event` — Служебный журнал отказов для статистики (вне инфологической модели)
 
 | Столбец | Тип | NULL | Значение по умолчанию |
 |---|---|---|---|

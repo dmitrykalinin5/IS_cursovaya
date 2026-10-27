@@ -1,0 +1,59 @@
+Helios PostgreSQL diagnostics
+                                                                                 version
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 18.3 on amd64-portbld-freebsd14.4, compiled by FreeBSD clang version 19.1.7 (https://github.com/llvm/llvm-project.git llvmorg-19.1.7-0-gcd708029e0b2), 64-bit
+(1 строка)
+
+ current_user | current_database
+--------------+------------------
+ s466088      | studs
+(1 строка)
+
+ extname | extension_schema
+---------+------------------
+(0 строк)
+
+ name | default_version | installed_version
+------+-----------------+-------------------
+(0 строк)
+
+ database_create | temporary_objects
+-----------------+-------------------
+ f               | t
+(1 строка)
+
+ nspname | can_create | can_use
+---------+------------+---------
+ s466088 | t          | t
+(1 строка)
+
+ rolsuper | rolcreaterole
+----------+---------------
+ f        | f
+(1 строка)
+
+PASS: studs / s466088, PostgreSQL 14+, schema CREATE/USAGE and TEMP
+BEGIN
+SET
+ pg_advisory_xact_lock
+-----------------------
+
+(1 строка)
+
+CREATE FUNCTION
+SET
+DO
+LOCK TABLE
+ALTER TABLE
+ALTER TABLE
+UPDATE 1
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE FUNCTION
+ALTER FUNCTION
+ALTER FUNCTION
+REVOKE
+UPDATE 1
+PASS: approved model migrated without deleting tables or reseeding
+COMMIT

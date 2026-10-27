@@ -1,0 +1,12 @@
+{
+  "target": "local isolated simulation, PostgreSQL 18.6, studs.s466088",
+  "source": "recorded 2026-10-13 deployment",
+  "checks": [
+    "all business and reference rows unchanged (work_kind excluded from comparison)",
+    "unrelated other_lab retained unchanged",
+    "historical work_kind backfilled",
+    "repeat migration unchanged",
+    "repeat install unchanged"
+  ],
+  "passed": true
+}

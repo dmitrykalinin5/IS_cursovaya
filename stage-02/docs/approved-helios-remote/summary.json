@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-27",
+  "target": "pg/studs/s466088",
+  "server": "18.3",
+  "counts": {
+    "business": 57,
+    "work_kind": 4,
+    "smoke": 18,
+    "demo": 6,
+    "concurrency": 10
+  },
+  "rows_and_unrelated_metadata_preserved": true,
+  "repeat_migration": true,
+  "repeat_install": true,
+  "source_hash": "c7a0904040e4e0342f9f3cbff2a9dad7b7ffdd20e62382fea08f705f8667f12d",
+  "directory": "/home/studs/s466088/labreserve-stage02-20261027"
+}

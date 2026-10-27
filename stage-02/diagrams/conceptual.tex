@@ -1,64 +1,16 @@
-\documentclass[a4paper,landscape,10pt]{article}
-\usepackage{fontspec}\usepackage[russian]{babel}
-\setmainfont{DejaVu Serif}\setsansfont{DejaVu Sans}
-\usepackage[margin=1.2cm]{geometry}\usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta}
-\pagestyle{empty}\setlength{\parindent}{0pt}
-\tikzset{entity/.style={draw,rounded corners,fill=blue!6,text width=4.4cm,align=center,font=\sffamily\small,minimum height=1.6cm},rel/.style={thick},lab/.style={fill=white,font=\small,inner sep=3pt}}
+\documentclass[a3paper,landscape]{article}
+\usepackage{fontspec}
+\usepackage[russian]{babel}
+\setmainfont{DejaVu Sans}
+\usepackage[margin=10mm]{geometry}
+\usepackage{graphicx}
+\pagestyle{empty}
 \begin{document}
-\begin{center}\Large Концептуальная ER-модель: каталог и допуски\end{center}
-Кратности у концов линии задают число экземпляров этой сущности для одного экземпляра на другом конце.
-\begin{center}\begin{tikzpicture}
-\node[entity] (user) at (0,0) {Пользователь\\идентификатор, логин, имя, активность};
-\node[entity] (role) at (8,0) {Роль\\код: пользователь, техник, администратор};
-\node[entity] (admission) at (0,-4) {Допуск\\идентификатор, срок действия, основание, отзыв};
-\node[entity] (type) at (8,-4) {Тип оборудования\\идентификатор, название, архив};
-\node[entity] (equip) at (16,-4) {Единица оборудования\\инвентарный номер, название, характеристики, архив};
-\node[entity] (cap) at (8,-8) {Функциональная возможность\\идентификатор, название};
-\draw[rel] (user) -- node[lab,pos=.18]{0..N} node[lab,pos=.82]{0..N} node[lab,pos=.5,above=7pt]{M:N --- назначение ролей} (role);
-\draw[rel] (user) -- node[lab,pos=.18]{1} node[lab,pos=.82]{0..N} (admission);
-\draw[rel] (admission) -- node[lab,pos=.18]{0..N} node[lab,pos=.82]{1} (type);
-\draw[rel] (type) -- node[lab,pos=.18]{1} node[lab,pos=.82]{0..N} (equip);
-\draw[rel] (type) -- node[lab,pos=.18]{0..N} node[lab,pos=.82]{0..N} node[lab,pos=.5,right=8pt]{M:N --- поддержка функций} (cap);
-\end{tikzpicture}\end{center}
-\vfill В реляционной модели M:N раскрываются таблицами user\_role и type\_capability. Допуск содержит автора назначения (Пользователь; 1 к 0..N). Тип и функция могут существовать до появления связей.
-\newpage
-\begin{center}\Large Концептуальная ER-модель: бронирование и работа\end{center}
-Повторённые Пользователь, Оборудование и Функция обозначают те же сущности, что на первом листе.
-\begin{center}\begin{tikzpicture}
-\node[entity] (user) at (0,0) {Пользователь};
-\node[entity] (equip) at (8,0) {Единица оборудования};
-\node[entity] (cap) at (16,0) {Функциональная возможность};
-\node[entity] (conflict) at (0,-4) {Отклонённый запрос\\интервал, код причины, момент события};
-\node[entity] (book) at (8,-4) {Бронирование\\идентификатор, плановый интервал, цель, статус};
-\node[entity] (alt) at (0,-8) {Предложенная альтернатива\\оборудование, интервал, приоритет, состояние};
-\node[entity] (session) at (8,-8) {Фактический сеанс\\начало, окончание, комментарий};
-\node[entity] (notification) at (16,-8) {Уведомление\\получатель, вид, текст, время прочтения};
-\draw[rel] (user) -- node[lab,pos=.2]{1} node[lab,pos=.8]{0..N} (conflict);
-\draw[rel] (user.south east) -- node[lab,pos=.25]{1} node[lab,pos=.75]{0..N} (book.north west);
-\draw[rel] (equip) -- node[lab,pos=.2]{1} node[lab,pos=.8]{0..N} (book);
-\draw[rel] (cap.south west) -- node[lab,pos=.25]{1} node[lab,pos=.75]{0..N} (book.north east);
-\draw[rel] (book.south west) -- node[lab,pos=.25]{1} node[lab,pos=.75]{0..N} (alt.north east);
-\draw[rel] (book) -- node[lab,pos=.2]{1} node[lab,pos=.8]{0..1} (session);
-\draw[rel] (book.south east) -- node[lab,pos=.25]{0..1} node[lab,pos=.75]{0..N} (notification.north west);
-\end{tikzpicture}\end{center}
-\vfill Альтернатива и отклонённый запрос относятся к одной единице оборудования (1 к 0..N). Уведомление имеет одного получателя (1 к 0..N). Дополнительные связи показаны в даталогической модели и полном исходнике conceptual.mmd.
-\newpage
-\begin{center}\Large Концептуальная ER-модель: доступность и история\end{center}
-Плановое ТО и подтверждённая неисправность представлены периодом недоступности с обязательным видом причины.
-\begin{center}\begin{tikzpicture}
-\node[entity] (equip) at (0,0) {Единица оборудования};
-\node[entity] (report) at (8,0) {Сообщение о неисправности\\описание, время, статус проверки};
-\node[entity] (user) at (16,0) {Пользователь};
-\node[entity] (unavail) at (0,-5) {Период недоступности\\вид, интервал, причина, статус, автор проверки};
-\node[entity] (repair) at (8,-5) {Техническая работа / ремонт\\интервал, исполнитель, результат};
-\node[entity] (audit) at (16,-5) {Запись аудита\\объект, действие, до/после, автор, транзакция};
-\draw[rel] (equip) -- node[lab,pos=.2]{1} node[lab,pos=.8]{0..N} (report);
-\draw[rel] (report) -- node[lab,pos=.2]{0..N} node[lab,pos=.8]{1} (user);
-\draw[rel] (equip) -- node[lab,pos=.2]{1} node[lab,pos=.8]{0..N} (unavail);
-\draw[rel] (report.south west) -- node[lab,pos=.25]{0..1} node[lab,pos=.75]{0..1} (unavail.north east);
-\draw[rel] (unavail) -- node[lab,pos=.2]{1} node[lab,pos=.8]{0..N} (repair);
-\draw[rel] (user) -- node[lab,pos=.2]{0..1} node[lab,pos=.8]{0..N} (audit);
-\end{tikzpicture}\end{center}
-\vfill Техническая работа имеет одного исполнителя. Период имеет одного автора регистрации и необязательного автора завершения. Эти связи относятся к Пользователю (1 к 0..N). Аудит ссылается на объект логически через имя таблицы и ключ; это не полиморфный FK. Для неисправности ссылка на сообщение обязательна, для ТО отсутствует.
+\begin{center}
+{\Large Инфологическая модель «ЛабРезерв»}\par\medskip
+13 сущностей; две связи M:N. Согласованная модель.\par\bigskip
+\includegraphics[width=\textwidth,height=0.84\textheight,keepaspectratio]{conceptual_approved.png}
+\par\bigskip
+Редактируемый исходник: conceptual\_approved.xml (draw.io).
+\end{center}
 \end{document}

@@ -182,8 +182,9 @@ BEGIN
  IF u.status<>'active' THEN RAISE EXCEPTION 'Already resolved' USING ERRCODE='23514'; END IF;
  stop_at:=clock_timestamp();
  IF lower(u.period)>=stop_at THEN RAISE EXCEPTION 'Cannot finish before start' USING ERRCODE='23514'; END IF;
- INSERT INTO repair(unavailability_id,performed_by,period,result)
- VALUES(u.id,p_actor,tstzrange(lower(u.period),stop_at,'[)'),p_result);
+ INSERT INTO repair(unavailability_id,performed_by,work_kind,period,result)
+ VALUES(u.id,p_actor,CASE WHEN u.kind='maintenance' THEN 'maintenance' ELSE 'repair' END,
+ tstzrange(lower(u.period),stop_at,'[)'),p_result);
  UPDATE unavailability SET period=tstzrange(lower(u.period),LEAST(upper(u.period),stop_at),'[)'),
  status='resolved',resolved_by=p_actor,resolved_at=stop_at WHERE id=u.id;
  RETURN equipment_state(u.equipment_id,stop_at);

@@ -1,0 +1,9 @@
+BEGIN
+SET
+CREATE FUNCTION
+psql:output/helios-approved/approved-model-tests.sql:36: NOTICE:  PASS: N01 вид работы при устранении неисправности
+psql:output/helios-approved/approved-model-tests.sql:36: NOTICE:  PASS: N02 вид работы при завершении ТО
+psql:output/helios-approved/approved-model-tests.sql:36: NOTICE:  PASS: N03 пустой вид работы отклонён
+psql:output/helios-approved/approved-model-tests.sql:36: NOTICE:  PASS: N04 вид работы обязателен
+DO
+ROLLBACK

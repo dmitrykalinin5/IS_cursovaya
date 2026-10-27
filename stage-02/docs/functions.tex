@@ -112,7 +112,7 @@
 \item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}unavailability bigint,p\_\allowbreak{}result text.
 \item Выход: text: итоговое состояние.
 \item Ошибки: 23514: причина уже закрыта/\allowbreak{}ещё не началась; 42501: роль.
-\item Гарантии: История ремонта; остальные причины продолжают блокировать.
+\item Гарантии: Сохраняется вид работы work\_\allowbreak{}kind (maintenance/\allowbreak{}repair); остальные события продолжают блокировать.
 \item Трассировка: UC-02; FR-18; BR-3,8; T27,29.
 \end{itemize}
 \subsection{open\_\allowbreak{}session}

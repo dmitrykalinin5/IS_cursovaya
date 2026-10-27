@@ -144,7 +144,7 @@ created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp(
 \end{itemize}
 \par\noindent\begin{minipage}{\linewidth}
 \subsection{alternative}
-Историческое предложение переноса и выбор.\par\smallskip\noindent
+Предложение переноса: интервал, приоритет и статус.\par\smallskip\noindent
 \begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
 \toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
 id & bigint & нет & IDENTITY \\
@@ -184,7 +184,7 @@ state & text & нет & 'reported'::text \\
 \end{itemize}
 \par\noindent\begin{minipage}{\linewidth}
 \subsection{unavailability}
-Период ТО либо подтверждённой неисправности.\par\smallskip\noindent
+Техническое событие: ТО либо подтверждённая неисправность.\par\smallskip\noindent
 \begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
 \toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
 id & bigint & нет & IDENTITY \\
@@ -214,16 +214,18 @@ created\_\allowbreak{}at & timestamptz & нет & clock\_\allowbreak{}timestamp(
 \end{itemize}
 \par\noindent\begin{minipage}{\linewidth}
 \subsection{repair}
-Исполнитель и результат технической работы.\par\smallskip\noindent
+Техническая работа: вид, исполнитель, интервал и результат.\par\smallskip\noindent
 \begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
 \toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
 id & bigint & нет & IDENTITY \\
 unavailability\_\allowbreak{}id & bigint & нет & — \\
 performed\_\allowbreak{}by & bigint & нет & — \\
+work\_\allowbreak{}kind & text & нет & — \\
 period & time\_\allowbreak{}window & нет & — \\
 result & text & нет & — \\
 \bottomrule\end{tabular}\end{minipage}\par
 \begin{itemize}
+\item CHECK ((length(TRIM(BOTH FROM work\_\allowbreak{}kind)) > 0)).
 \item CHECK ((NOT upper\_\allowbreak{}inf((period)::tstzrange))).
 \item PRIMARY KEY (id).
 \item FOREIGN KEY (unavailability\_\allowbreak{}id) REFERENCES labreserve.unavailability(id) ON UPDATE RESTRICT ON DELETE RESTRICT.
@@ -267,7 +269,7 @@ read\_\allowbreak{}at & timestamptz & да & — \\
 \end{itemize}
 \par\noindent\begin{minipage}{\linewidth}
 \subsection{audit\_\allowbreak{}event}
-Неизменяемый журнал значимых изменений.\par\smallskip\noindent
+Служебный журнал значимых изменений (вне инфологической модели).\par\smallskip\noindent
 \begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
 \toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
 id & bigint & нет & IDENTITY \\
@@ -286,7 +288,7 @@ transaction\_\allowbreak{}id & bigint & нет & txid\_\allowbreak{}current() \\
 \end{itemize}
 \par\noindent\begin{minipage}{\linewidth}
 \subsection{conflict\_\allowbreak{}event}
-Отклонённый запрос для статистики конфликтов.\par\smallskip\noindent
+Служебный журнал отказов для статистики (вне инфологической модели).\par\smallskip\noindent
 \begin{tabular}{p{0.29\textwidth}p{0.25\textwidth}p{0.1\textwidth}p{0.25\textwidth}}
 \toprule Столбец & Тип & NULL & По умолчанию \\ \midrule
 id & bigint & нет & IDENTITY \\

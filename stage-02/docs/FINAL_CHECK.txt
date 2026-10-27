@@ -1,6 +1,8 @@
-2026-10-11
-PASS: 17 tables, 27 FK, 32 functions (19 external), 25 triggers, 38 indexes (13 explicit).
-PASS: 60 SQL assertions after full DROP/CREATE database.
-PASS: 5 real two-connection race scenarios.
-PASS: 375 unchanged stage-01 files (SHA-256).
-PASS: report.pdf built with XeLaTeX; 38 pages; no Overfull or unresolved references.
+2026-10-27 — согласованная модель
+13 conceptual entities; 20 links; 2 M:N; 17 tables; 27 FK; 32 functions; 25 triggers; 38 indexes.
+Local: 60+4 assertions, recreate 60+4, concurrency 5/5.
+Helios LOCAL simulation: 57+4 assertions, smoke 18/18, concurrency 10/10, adapter 7/7.
+Migration: business data and unrelated fixture preserved; repeat migration/install passed.
+Defense: LOCAL and Helios simulation, six checks each, ROLLBACK.
+Report: 38 pages, XeLaTeX; details in VISUAL_QA.md.
+Real Helios PostgreSQL 18.3 updated; 57+4 SQL, 18 smoke, 10 concurrency, 6 demo checks; data preserved; repeat migration/install passed.

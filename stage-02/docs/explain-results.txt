@@ -9,108 +9,108 @@ ANALYZE
 Q1 overlap (GiST enforced partial index)
                                                                                                           QUERY PLAN
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- Index Scan using ex_booking_overlap on booking  (cost=8.59..16.61 rows=1 width=8) (actual time=0.048..0.048 rows=1.00 loops=1)
+ Index Scan using ex_booking_overlap on booking  (cost=8.59..16.61 rows=1 width=8) (actual time=0.050..0.051 rows=1.00 loops=1)
    Index Cond: ((equipment_id = (InitPlan 1).col1) AND ((period)::tstzrange && tstzrange((date_trunc('day'::text, now()) + '100 days 10:00:00'::interval), (date_trunc('day'::text, now()) + '100 days 11:00:00'::interval))))
    Index Searches: 1
    Buffers: shared hit=27
    InitPlan 1
-     ->  Index Scan using equipment_inventory_no_key on equipment  (cost=0.28..8.29 rows=1 width=8) (actual time=0.030..0.031 rows=1.00 loops=1)
+     ->  Index Scan using equipment_inventory_no_key on equipment  (cost=0.28..8.29 rows=1 width=8) (actual time=0.025..0.025 rows=1.00 loops=1)
            Index Cond: (inventory_no = 'BENCH-500'::text)
            Index Searches: 1
            Buffers: shared hit=23
  Planning:
    Buffers: shared hit=77
- Planning Time: 0.194 ms
- Execution Time: 0.058 ms
+ Planning Time: 0.308 ms
+ Execution Time: 0.067 ms
 (13 rows)
 
 Q2 future bookings by owner (partial B-tree)
                                                                    QUERY PLAN
 ------------------------------------------------------------------------------------------------------------------------------------------------
- Limit  (cost=0.29..2.63 rows=20 width=38) (actual time=0.011..0.014 rows=20.00 loops=1)
+ Limit  (cost=0.29..2.63 rows=20 width=38) (actual time=0.016..0.022 rows=20.00 loops=1)
    Buffers: shared hit=6
-   ->  Index Scan using ix_booking_user_future on booking  (cost=0.29..780.92 rows=6667 width=38) (actual time=0.010..0.012 rows=20.00 loops=1)
+   ->  Index Scan using ix_booking_user_future on booking  (cost=0.29..780.92 rows=6667 width=38) (actual time=0.014..0.019 rows=20.00 loops=1)
          Index Cond: ((user_id = 1) AND (lower((period)::tstzrange) > now()))
          Index Searches: 1
          Buffers: shared hit=6
  Planning:
    Buffers: shared hit=20
- Planning Time: 0.064 ms
- Execution Time: 0.019 ms
+ Planning Time: 0.116 ms
+ Execution Time: 0.032 ms
 (10 rows)
 
 Q3 type/function catalogue (B-tree)
                                                                                QUERY PLAN
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- Limit  (cost=0.44..175.14 rows=20 width=8) (actual time=0.010..0.071 rows=20.00 loops=1)
-   Buffers: shared hit=367
-   ->  Nested Loop  (cost=0.44..393.51 rows=45 width=8) (actual time=0.010..0.070 rows=20.00 loops=1)
-         Buffers: shared hit=367
-         ->  Index Scan using equipment_pkey on equipment e  (cost=0.28..367.35 rows=1005 width=16) (actual time=0.005..0.058 rows=23.00 loops=1)
+ Limit  (cost=0.44..175.14 rows=20 width=8) (actual time=0.026..0.121 rows=20.00 loops=1)
+   Buffers: shared hit=366
+   ->  Nested Loop  (cost=0.44..393.51 rows=45 width=8) (actual time=0.026..0.118 rows=20.00 loops=1)
+         Buffers: shared hit=366
+         ->  Index Scan using equipment_pkey on equipment e  (cost=0.28..367.35 rows=1005 width=16) (actual time=0.008..0.087 rows=23.00 loops=1)
                Filter: (NOT archived)
                Index Searches: 1
-               Buffers: shared hit=362
-         ->  Memoize  (cost=0.16..0.23 rows=1 width=8) (actual time=0.000..0.000 rows=0.87 loops=23)
+               Buffers: shared hit=361
+         ->  Memoize  (cost=0.16..0.23 rows=1 width=8) (actual time=0.001..0.001 rows=0.87 loops=23)
                Cache Key: e.type_id
                Cache Mode: logical
                Hits: 19  Misses: 4  Evictions: 0  Overflows: 0  Memory Usage: 1kB
                Buffers: shared hit=5
-               ->  Index Only Scan using ix_type_capability_reverse on type_capability c  (cost=0.15..0.22 rows=1 width=8) (actual time=0.001..0.001 rows=0.25 loops=4)
+               ->  Index Only Scan using ix_type_capability_reverse on type_capability c  (cost=0.15..0.22 rows=1 width=8) (actual time=0.004..0.004 rows=0.25 loops=4)
                      Index Cond: ((capability_id = 1) AND (type_id = e.type_id))
                      Heap Fetches: 1
                      Index Searches: 4
                      Buffers: shared hit=5
  Planning:
    Buffers: shared hit=9
- Planning Time: 0.082 ms
- Execution Time: 0.080 ms
+ Planning Time: 0.140 ms
+ Execution Time: 0.137 ms
 (22 rows)
 
 Q4 admission coverage (small relation may favor sequential scan)
                                                                                   QUERY PLAN
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- Seq Scan on admission  (cost=0.00..1.36 rows=1 width=8) (actual time=0.005..0.006 rows=1.00 loops=1)
+ Seq Scan on admission  (cost=0.00..1.36 rows=1 width=8) (actual time=0.008..0.010 rows=1.00 loops=1)
    Filter: ((revoked_at IS NULL) AND (user_id = 1) AND (type_id = 1) AND ((valid_during)::tstzrange @> tstzrange((now() + '1 day'::interval), (now() + '2 days'::interval))))
    Rows Removed by Filter: 11
    Buffers: shared hit=1
  Planning:
    Buffers: shared hit=40
- Planning Time: 0.101 ms
- Execution Time: 0.009 ms
+ Planning Time: 0.135 ms
+ Execution Time: 0.016 ms
 (8 rows)
 
 Q5 audit history
-                                                                   QUERY PLAN
-------------------------------------------------------------------------------------------------------------------------------------------------
- Limit  (cost=0.29..77.31 rows=20 width=16) (actual time=0.006..0.007 rows=2.00 loops=1)
+                                                                 QUERY PLAN
+--------------------------------------------------------------------------------------------------------------------------------------------
+ Limit  (cost=0.29..8.31 rows=1 width=16) (actual time=0.009..0.010 rows=2.00 loops=1)
    Buffers: shared hit=3
-   ->  Index Scan using ix_audit_record_time on audit_event  (cost=0.29..512.48 rows=133 width=16) (actual time=0.005..0.006 rows=2.00 loops=1)
+   ->  Index Scan using ix_audit_record_time on audit_event  (cost=0.29..8.31 rows=1 width=16) (actual time=0.008..0.009 rows=2.00 loops=1)
          Index Cond: ((table_name = 'booking'::text) AND ((record_key ->> 'id'::text) = '1'::text))
          Index Searches: 1
          Buffers: shared hit=3
  Planning:
-   Buffers: shared hit=20
- Planning Time: 0.044 ms
- Execution Time: 0.010 ms
+   Buffers: shared hit=28
+ Planning Time: 0.072 ms
+ Execution Time: 0.017 ms
 (10 rows)
 
 Q1 comparison without secondary query index (EXCLUDE still exists)
 DROP INDEX
                                                                                                           QUERY PLAN
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- Index Scan using ex_booking_overlap on booking  (cost=8.59..16.61 rows=1 width=8) (actual time=0.025..0.026 rows=1.00 loops=1)
+ Index Scan using ex_booking_overlap on booking  (cost=8.59..16.61 rows=1 width=8) (actual time=0.041..0.041 rows=1.00 loops=1)
    Index Cond: ((equipment_id = (InitPlan 1).col1) AND ((period)::tstzrange && tstzrange((date_trunc('day'::text, now()) + '100 days 10:00:00'::interval), (date_trunc('day'::text, now()) + '100 days 11:00:00'::interval))))
    Index Searches: 1
    Buffers: shared hit=27
    InitPlan 1
-     ->  Index Scan using equipment_inventory_no_key on equipment  (cost=0.28..8.29 rows=1 width=8) (actual time=0.014..0.014 rows=1.00 loops=1)
+     ->  Index Scan using equipment_inventory_no_key on equipment  (cost=0.28..8.29 rows=1 width=8) (actual time=0.020..0.021 rows=1.00 loops=1)
            Index Cond: (inventory_no = 'BENCH-500'::text)
            Index Searches: 1
            Buffers: shared hit=23
  Planning:
    Buffers: shared hit=4
- Planning Time: 0.062 ms
- Execution Time: 0.031 ms
+ Planning Time: 0.114 ms
+ Execution Time: 0.052 ms
 (13 rows)
 
 ROLLBACK

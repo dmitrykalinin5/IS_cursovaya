@@ -93,6 +93,7 @@ CREATE TABLE repair (
  id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
  unavailability_id bigint NOT NULL REFERENCES unavailability ON DELETE RESTRICT ON UPDATE RESTRICT,
  performed_by bigint NOT NULL REFERENCES app_user ON DELETE RESTRICT ON UPDATE RESTRICT,
+ work_kind text NOT NULL CHECK (length(trim(work_kind)) > 0),
  period time_window NOT NULL CHECK (NOT upper_inf(period)), result text NOT NULL
 );
 CREATE TABLE use_session (
