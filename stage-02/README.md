@@ -1,7 +1,7 @@
 # ЛабРезерв — этап 2: проектирование и реализация БД
 
 Материалы второго этапа: модель данных, реализация PostgreSQL, отчёт и проверки.
-Основа проектирования — согласованная `../ER-модель_final.drawio.xml` (13 сущностей) и требования первого этапа в `../stage-01/`.
+Основа проектирования — согласованная `ER-модель_final.drawio.xml` (13 сущностей) и требования первого этапа в `../stage-01/`.
 
 [Пункты официального задания и результаты](docs/STAGE02_CHECKLIST.md).
 
@@ -13,21 +13,19 @@
 - 19 внешних SQL-функций, 13 внутренних функций/обработчиков, 25 пользовательских триггеров.
 - 13 явных индексов + 25 индексов PK/UNIQUE/EXCLUDE.
 - 60 основных + 4 дополнительных утверждающих SQL-теста, 5 конкурентных сценариев, EXPLAIN на 1 000 дополнительных единицах и 20 000 бронях.
-- Отдельные `report.tex` / `report.pdf`, редактируемые TikZ и Mermaid, PDF диаграмм.
+- Отдельные `report.tex` / `report.pdf`, редактируемые draw.io XML и TikZ, PDF диаграмм.
 
 ## Файлы
 
 | Путь | Назначение |
 |---|---|
 | `report.tex`, `report.pdf` | Самостоятельный отчёт этапа 2 |
-| `diagrams/conceptual.{tex,mmd,pdf}` | Согласованная ER-модель на одном листе; conceptual.tex использует точную копию PNG |
-| `diagrams/conceptual_full.{tex,pdf}` | Исторический вариант до согласования (15 сущностей); для защиты используйте conceptual_approved |
-| `diagrams/conceptual_full.{drawio,xml}` | Исторический вариант до согласования; актуальная версия — conceptual_approved |
-| `diagrams/conceptual_approved.{xml,drawio,png}` | Точные копии согласованных исходников из корня |
-| `diagrams/logical.{drawio,xml}` | Даталогическая схема с точным расположением согласованных 13 блоков; дополнены две таблицы M:N |
+| `ER-модель_final.drawio.{xml,png}` | Единственный согласованный исходник инфологической модели и его изображение |
+| `diagrams/conceptual.{tex,pdf}` | Согласованная ER-модель на одном листе; conceptual.tex использует согласованный PNG |
+| `diagrams/logical.xml` | Даталогическая схема с точным расположением согласованных 13 блоков; дополнены две таблицы M:N |
 | `sql/demo/defense.sql` | Живой сценарий защиты в psql, с ROLLBACK |
 | `sql/helios/migrate_approved_model.py` | Генерация миграции старой Helios-схемы, проверок и демонстрации |
-| `diagrams/logical.{tex,mmd,pdf}` | Единая предметная схема с исходной расстановкой: 13 согласованных сущностей + 2 таблицы M:N, поля, типы и ключи |
+| `diagrams/logical.{tex,pdf}` | Единая предметная схема с исходной расстановкой: 13 согласованных сущностей + 2 таблицы M:N, поля, типы и ключи |
 | `sql/schema/` | DDL, домен диапазонов, ограничения и триггеры |
 | `sql/functions/` | Критические операции PostgreSQL/PLpgSQL |
 | `sql/indexes/` | Индексы; обоснование в docs/INDEXES.md |
@@ -87,10 +85,12 @@ pg_ctl -D /tmp/labreserve-stage02-pg stop
 ```bash
 python3 docs/generate_models.py
 python3 docs/generate_report_tables.py
-python3 docs/generate_drawio.py
 python3 docs/verify_approved_model.py
-(cd diagrams && FONTCONFIG_FILE="$PWD/fonts.conf" xelatex -halt-on-error -interaction=nonstopmode conceptual.tex)
-(cd diagrams && FONTCONFIG_FILE="$PWD/fonts.conf" xelatex -halt-on-error -interaction=nonstopmode logical.tex)
+mkdir -p output/model-build
+(cd diagrams && FONTCONFIG_FILE="$PWD/fonts.conf" xelatex -halt-on-error -interaction=nonstopmode -output-directory=../output/model-build conceptual.tex)
+cp output/model-build/conceptual.pdf diagrams/conceptual.pdf
+(cd diagrams && FONTCONFIG_FILE="$PWD/fonts.conf" xelatex -halt-on-error -interaction=nonstopmode -output-directory=../output/model-build logical.tex)
+cp output/model-build/logical.pdf diagrams/logical.pdf
 FONTCONFIG_FILE="$PWD/diagrams/fonts.conf" latexmk -xelatex -halt-on-error -interaction=nonstopmode -outdir=output report.tex
 cp output/report.pdf report.pdf
 ```
@@ -125,6 +125,6 @@ psql -X -h pg -U s466088 -d studs -f sql/helios/demo.sql
 
 ## Актуализация по согласованной модели — 27.10.2026
 
-Рабочая инфологическая модель: `diagrams/conceptual_approved.xml`; даталогическая: `diagrams/logical.xml` (обе открываются через draw.io → Файл → Открыть).
+Рабочая инфологическая модель: `ER-модель_final.drawio.xml`; даталогическая: `diagrams/logical.xml` (обе открываются через draw.io → Файл → Открыть).
 Текущая редакция проверена в изолированном PostgreSQL 18.6: 60 + 4 SQL-проверки, 5 конкурентных сценариев и повторное создание схемы.
 Реальный Helios обновлён 27.10.2026: добавлен `repair.work_kind`, данные сохранены; 57+4 SQL-проверки, 18 smoke, 10 конкурентных и сценарий защиты прошли. Свидетельства — `docs/approved-helios-remote/`; команды — `docs/DEFENSE.md`.

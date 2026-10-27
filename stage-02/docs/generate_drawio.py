@@ -9,7 +9,7 @@ tables={t['name']:t for t in model['tables']}
 names={'user':'app_user','role':'app_role','adm':'admission','notice':'notification',
  'type':'equipment_type','book':'booking','session':'use_session','cap':'capability',
  'alt':'alternative','repair':'repair','equip':'equipment','fault':'fault_report','outage':'unavailability'}
-source=E.parse(root/'diagrams/conceptual_approved.xml').getroot()
+source=E.parse(root/'ER-модель_final.drawio.xml').getroot()
 mx=copy.deepcopy(source);g=mx.find('.//mxGraphModel');r=g.find('root')
 for cell in list(r):
  if cell.tag=='mxCell' and cell.get('id') not in names and cell.get('id') not in ('0','1') and cell.get('edge')!='1':r.remove(cell)
@@ -62,7 +62,7 @@ for ident,parent,child,ex,ey,ix,iy,field in [
  ('cap-type_capability','capability','type_capability',0,.5,1,.5,'capability_id')]:
  c=E.SubElement(r,'mxCell',id=ident,parent='1',edge='1',source=parent,target=child,value='',style=f'edgeStyle=orthogonalEdgeStyle;startArrow=ERone;endArrow=ERmany;startSize=12;endSize=12;strokeColor=#1D6F8B;exitX={ex};exitY={ey};entryX={ix};entryY={iy};',attrib={'data-fk-fields':field})
  E.SubElement(c,'mxGeometry',relative='1',attrib={'as':'geometry'})
-for ext in ('drawio','xml'):E.ElementTree(mx).write(root/f'diagrams/logical.{ext}',encoding='utf-8',xml_declaration=True)
+E.ElementTree(mx).write(root/'diagrams/logical.xml',encoding='utf-8',xml_declaration=True)
 print('15 domain/association tables; original 13 geometries and 18 routes unchanged; 24 FK represented by 22 connectors')
 # One landscape sheet, using the approved geometry also for the PDF.
 def tx(s):return str(s).replace('_',r'\_').replace('&',r'\&').replace('%',r'\%')

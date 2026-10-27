@@ -6,12 +6,8 @@ root=Path(__file__).resolve().parents[1]
 names={'user':'app_user','role':'app_role','adm':'admission','notice':'notification',
  'type':'equipment_type','book':'booking','session':'use_session','cap':'capability',
  'alt':'alternative','repair':'repair','equip':'equipment','fault':'fault_report','outage':'unavailability'}
-for ext in ('xml','png'):
- original=root.parent/f'ER-модель_final.drawio.{ext}'
- if not original.exists():original=root/f'ER-модель_final.drawio.{ext}'
- assert (root/f'diagrams/conceptual_approved.{ext}').read_bytes()==original.read_bytes()
 model=json.loads((root/'docs/datalogical.json').read_text());tables={t['name']:t for t in model['tables']}
-approved=E.parse(root/'diagrams/conceptual_approved.xml').getroot()
+approved=E.parse(root/'ER-модель_final.drawio.xml').getroot()
 entities={c.get('id') for c in approved.iter('mxCell') if c.get('id') in names}
 assert entities==names.keys()
 links=[c for c in approved.iter('mxCell') if c.get('edge')=='1'];many=0
@@ -47,4 +43,4 @@ assert represented=={f for f in fks if f[0] in visible and f[1] in visible}
 assert len(represented)==24
 assert len([c for c in logical.iter('mxCell') if c.get('edge')=='1'])==22
 print('PASS: all 13 original box geometries preserved; 15 domain/association tables; all 24 domain FK represented')
-print('PASS: approved originals unchanged; 13 entities; all 20 approved links covered; 2 M:N; 17 tables; 27 FK; mandatory work_kind')
+print('PASS: 13 approved entities; all 20 approved links covered; 2 M:N; 17 tables; 27 FK; mandatory work_kind')

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generate dictionary and editable diagrams from the verified PostgreSQL export."""
-import json,re
+"""Generate the dictionary and the current editable diagram from the verified PostgreSQL export."""
+import json
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
 m=json.loads((root/'docs/datalogical.json').read_text())
@@ -50,41 +50,6 @@ for name in purpose:
     md.append('')
 (root/'docs/DATA_DICTIONARY.md').write_text('\n'.join(md))
 (root/'docs/dictionary.tex').write_text('\n'.join(texparts))
-# Full ER Mermaid source: real key/FK relations, not an image-only asset.
-er=['erDiagram']
-for name,t in tables.items():
-    er.append(f'  {name} {{')
-    pk=' '.join(c['definition'] for c in t['constraints'] if c['kind']=='p')
-    fk=' '.join(c['definition'] for c in t['constraints'] if c['kind']=='f')
-    for c in t['columns']:
-        typ=c['udt'] if c['type']=='USER-DEFINED' else c['type'].replace(' ','_')
-        flag=' PK' if re.search(r'\b'+c['name']+r'\b',pk) else ' FK' if re.search(r'\b'+c['name']+r'\b',fk) else ''
-        er.append(f"    {typ} {c['name']}{flag}")
-    er.append('  }')
-for fk in m['foreign_keys']:
-    src=fk['from'].split('.')[-1]; dst=fk['to'].split('.')[-1]
-    field=re.search(r'FOREIGN KEY \((.*?)\)',fk['definition']).group(1)
-    nullable=next(c['nullable']=='YES' for c in tables[src]['columns'] if c['name']==field)
-    unique=any(c['kind']=='u' and c['definition']==f'UNIQUE ({field})' for c in tables[src]['constraints'])
-    er.append(f'  {dst} '+('o|' if nullable else '||')+'--'+('o|' if unique else 'o{')+f' {src} : "{field}"')
-(root/'diagrams/logical.mmd').write_text('\n'.join(er)+'\n')
-# The approved XML is the source of the conceptual graph; technical logs are excluded.
-import xml.etree.ElementTree as ET
-approved=ET.parse(root/'diagrams/conceptual_approved.xml').getroot()
-entity_map={'user':'app_user','role':'app_role','adm':'admission','notice':'notification',
- 'type':'equipment_type','book':'booking','session':'use_session','cap':'capability',
- 'alt':'alternative','repair':'repair','equip':'equipment','fault':'fault_report','outage':'unavailability'}
-con=['erDiagram']
-for cell in approved.iter('mxCell'):
-    if cell.get('id') in entity_map:
-        name=entity_map[cell.get('id')]
-        con += [f'  {name} {{']+[f"    {c['udt']} {c['name']}" for c in tables[name]['columns']]+['  }']
-    if cell.get('edge')=='1':
-        style=dict(part.split('=',1) for part in cell.get('style','').split(';') if '=' in part)
-        left='}o' if style['startArrow']=='ERmany' else '||'
-        right='o{' if style['endArrow']=='ERmany' else '||'
-        con.append(f"  {entity_map[cell.get('source')]} {left}--{right} {entity_map[cell.get('target')]} : связь")
-(root/'diagrams/conceptual.mmd').write_text('\n'.join(con)+'\n')
 # A single full diagram is generated together with the draw.io source.
 import subprocess,sys
 subprocess.run([sys.executable,str(root/'docs/generate_drawio.py')],check=True)

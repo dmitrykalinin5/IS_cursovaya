@@ -4,7 +4,7 @@
 
 | Пункт задания | Результат | Где показать |
 |---|---|---|
-| 1. ER: минимум 10 сущностей и M:N | 13 сущностей, две M:N | diagrams/conceptual_approved.xml |
+| 1. ER: минимум 10 сущностей и M:N | 13 сущностей, две M:N | ER-модель_final.drawio.xml |
 | 2. Согласование и даталогическая модель | Согласование подтверждено пользователем; 17 физических таблиц, 27 FK | diagrams/logical.xml, docs/APPROVED_MODEL.md, docs/DATA_DICTIONARY.md |
 | 3. Реализация PostgreSQL | Таблицы, диапазоны времени, ключи и значения по умолчанию | sql/schema/01_tables.sql |
 | 4. Целостность DDL и триггерами | PK, FK, UNIQUE, CHECK, EXCLUDE; 25 триггеров | sql/schema/01_tables.sql, 02_triggers.sql, docs/INTEGRITY.md |
