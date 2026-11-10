@@ -66,11 +66,11 @@ BEGIN
  PERFORM pg_temp.ok((SELECT status='completed' FROM booking WHERE id=c),'T32 session closure completes booking');
  PERFORM pg_temp.reject(format('SELECT close_session(1,%s)',s),'23514','T33 double close rejected');
  PERFORM pg_temp.reject(format('UPDATE booking SET purpose=%L WHERE id=%s','Rewrite',c),'23514','T34 immutable completed booking');
- PERFORM pg_temp.reject('DELETE FROM audit_event','23514','T35 immutable audit');
- PERFORM pg_temp.ok((SELECT count(*)>0 FROM audit_event WHERE table_name='booking' AND action='UPDATE'),'T36 audit records meaningful changes');
+ PERFORM pg_temp.ok(to_regclass('labreserve.audit_event') IS NULL,'T35 no audit entity');
+ PERFORM pg_temp.ok(to_regclass('labreserve.conflict_event') IS NULL,'T36 no conflict entity');
  PERFORM pg_temp.ok(tstzrange('2030-01-01 10:00+03','2030-01-01 11:00+03')=tstzrange('2030-01-01 07:00Z','2030-01-01 08:00Z'),'T37 time zone equivalence');
  SELECT * INTO r FROM request_booking(1,3,2,base+interval '7 hours',base+interval '8 hours','Failed request');
- PERFORM pg_temp.ok(r.booking_id IS NULL AND r.error_code='23514' AND EXISTS(SELECT 1 FROM conflict_event WHERE requested_period @> base+interval '7 hours'),'T38 rejected request recorded');
+ PERFORM pg_temp.ok(r.booking_id IS NULL AND r.error_code='23514','T38 refusal returned without journal');
  PERFORM pg_temp.ok((SELECT actual_seconds>=0 AND downtime_seconds<=86400*20 FROM equipment_metrics(tstzrange(base-interval '10 days',base+interval '10 days')) WHERE equipment_id=2),'T39 clipped union downtime metrics');
  PERFORM pg_temp.ok((SELECT count(*)>=1 FROM equivalent_equipment(1,2,tstzrange(base+interval '1 day',base+interval '1 day 1 hour')) WHERE id=4),'T40 equivalent function across types');
  PERFORM pg_temp.reject(format('DELETE FROM booking WHERE id=%s',b),'23514','T41 booking history not deletable');
@@ -97,7 +97,7 @@ BEGIN
  PERFORM close_session(2,s,'Пользователь забыл завершить работу; проверено администратором');
  PERFORM pg_temp.ok((SELECT close_comment IS NOT NULL AND ended_at IS NOT NULL FROM use_session WHERE id=s),'T53 administrative closure comment retained');
  PERFORM pg_temp.reject('SELECT ''[2030-01-01 00:00Z,2030-01-02 00:00Z]''::time_window','23514','T54 inclusive upper bound rejected');
- PERFORM pg_temp.ok((SELECT count(*)=17 FROM information_schema.tables WHERE table_schema='labreserve' AND table_type='BASE TABLE'),'T55 17 physical tables');
+ PERFORM pg_temp.ok((SELECT count(*)=15 FROM information_schema.tables WHERE table_schema='labreserve' AND table_type='BASE TABLE'),'T55 15 physical tables');
 
  PERFORM register_unavailability(3,1,'maintenance',base+interval '2 days',base+interval '2 days 4 hours','Union A');
  PERFORM register_unavailability(3,1,'maintenance',base+interval '2 days 2 hours',base+interval '2 days 6 hours','Union B');

@@ -34,7 +34,7 @@ def snapshot():
     'tables',(SELECT jsonb_object_agg(relname,cnt) FROM
       (SELECT 'users' relname,count(*) cnt FROM s466088.lr_app_user UNION ALL
        SELECT 'bookings',count(*) FROM s466088.lr_booking UNION ALL
-       SELECT 'audit',count(*) FROM s466088.lr_audit_event) s),
+       SELECT 'notifications',count(*) FROM s466088.lr_notification) s),
     'other_rows',(SELECT jsonb_agg(x) FROM s466088.other_lab x),
     'other_relation',(SELECT row(relowner,relacl)::text FROM pg_class WHERE oid='s466088.other_lab'::regclass),
     'other_function',(SELECT pg_get_functiondef(oid)||COALESCE(proacl::text,'')||proowner FROM pg_proc
@@ -66,17 +66,22 @@ def main():
         deploy('modified objects')
         passed('I03 disabled business trigger detected')
     finally: sql('ALTER TABLE s466088.lr_booking ENABLE TRIGGER lr_booking_guard')
-    original_hash = sql('SELECT source_hash FROM s466088.lr_deployment')
-    sql("UPDATE s466088.lr_deployment SET source_hash='changed-source'")
+    original_note = sql("SELECT obj_description('s466088.lr_app_user'::regclass,'pg_class')")
+    def set_note(note):
+        value='NULL' if note is None else "'"+note.replace("'","''")+"'"
+        sql('COMMENT ON TABLE s466088.lr_app_user IS '+value)
+    prefix,payload=original_note.split('\n',1)
+    manifest=json.loads(payload);manifest['source_hash']='changed-source'
+    set_note(prefix+'\n'+json.dumps(manifest))
     try:
         deploy('source changed')
         passed('I04 changed source marker cannot trigger overwrite')
-    finally: sql(f"UPDATE s466088.lr_deployment SET source_hash='{original_hash}'")
-    sql('ALTER TABLE s466088.lr_deployment RENAME TO deployment_probe_backup')
+    finally: set_note(original_note)
+    set_note(None)
     try:
         deploy('Existing lr_ objects without deployment marker')
         passed('I07 objects without manifest are not overwritten')
-    finally: sql('ALTER TABLE s466088.deployment_probe_backup RENAME TO lr_deployment')
+    finally: set_note(original_note)
     # Wrong DB and user must fail before touching a schema.
     for field, value in [('PGDATABASE','postgres'),('PGUSER','lr_test_admin')]:
         env=dict(os.environ, PGDATABASE='studs', PGUSER='s466088'); env[field]=value

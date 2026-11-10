@@ -63,9 +63,8 @@ DO $$ DECLARE code text; BEGIN
  EXCEPTION WHEN OTHERS THEN code:=SQLSTATE; END;
  PERFORM pg_temp.demo_check(code='23514','повторное закрытие отклонено');
 END $$;
-\echo '7. Уведомления, аудит и аналитика'
+\echo '7. Уведомления и аналитика'
 SELECT kind,message FROM notification WHERE booking_id=:booking ORDER BY id;
-SELECT table_name,action,occurred_at FROM audit_event ORDER BY id DESC LIMIT 8;
 SELECT * FROM equipment_metrics(tstzrange(now()-interval '1 day',now()+interval '90 days','[)'));
 ROLLBACK;
 \echo 'Демонстрация завершена. Изменения отменены; счётчики идентификаторов могут иметь пропуски.'

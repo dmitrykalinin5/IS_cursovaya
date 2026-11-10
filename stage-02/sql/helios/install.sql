@@ -6,18 +6,12 @@ SET LOCAL lock_timeout='10s';
 SET LOCAL statement_timeout='60s';
 SELECT pg_advisory_xact_lock(hashtext('LabReserve:s466088'),1);
 \ir fingerprint.sql
-SELECT to_regclass('s466088.lr_deployment') IS NOT NULL AS installed \gset
+\ir manifest.sql
+SELECT pg_temp.lr_manifest() IS NOT NULL AS installed \gset
 \if :installed
-DO $$ BEGIN
- IF NOT EXISTS(SELECT 1 FROM pg_class WHERE oid='s466088.lr_deployment'::regclass
-   AND relkind='r' AND relowner=(SELECT oid FROM pg_roles WHERE rolname=current_user)
-   AND obj_description(oid,'pg_class')='LabReserve deployment manifest v1') THEN
-  RAISE EXCEPTION 'Unknown lr_deployment object; refusing overwrite';
- END IF;
-END $$;
-SELECT count(*)=1 AND COALESCE(bool_and(source_hash=:'source_hash'
- AND catalog_hash=pg_temp.lr_catalog_fingerprint() AND seeded),false) AS unchanged
- FROM s466088.lr_deployment \gset
+SELECT COALESCE((pg_temp.lr_manifest()->>'source_hash'=:'source_hash')
+ AND (pg_temp.lr_manifest()->>'catalog_hash'=pg_temp.lr_catalog_fingerprint())
+ AND (pg_temp.lr_manifest()->>'seeded')::boolean,false) AS unchanged \gset
 \if :unchanged
 \echo PASS: same source and intact objects; existing data preserved, seed skipped
 \else
@@ -45,16 +39,11 @@ SET LOCAL search_path=s466088,pg_catalog,:"extension_schema";
 \echo Installing serialized overlap trigger variant (no extension privileges needed)
 \ir trigger.sql
 \endif
-CREATE TABLE s466088.lr_deployment (
- source_hash text NOT NULL, overlap_mode text NOT NULL CHECK(overlap_mode IN ('gist','trigger')),
- seeded boolean NOT NULL, catalog_hash text NOT NULL, installed_at timestamptz NOT NULL DEFAULT clock_timestamp()
-);
-COMMENT ON TABLE s466088.lr_deployment IS 'LabReserve deployment manifest v1';
-REVOKE ALL ON TABLE s466088.lr_deployment FROM PUBLIC;
 SET LOCAL search_path=s466088,pg_catalog;
 \ir seed.sql
-INSERT INTO s466088.lr_deployment(source_hash,overlap_mode,seeded,catalog_hash)
- VALUES(:'source_hash',CASE WHEN :'use_gist'::boolean THEN 'gist' ELSE 'trigger' END,true,pg_temp.lr_catalog_fingerprint());
+SELECT format('COMMENT ON TABLE s466088.lr_app_user IS %L',E'LabReserve manifest v2\n'||jsonb_build_object(
+ 'source_hash',:'source_hash','overlap_mode',CASE WHEN :'use_gist'::boolean THEN 'gist' ELSE 'trigger' END,
+ 'seeded',true,'catalog_hash',pg_temp.lr_catalog_fingerprint(),'installed_at',clock_timestamp())::text) \gexec
 \endif
 COMMIT;
 \ir smoke_tests.sql

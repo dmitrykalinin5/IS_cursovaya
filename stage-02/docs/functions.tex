@@ -44,13 +44,13 @@
 \item Трассировка: UC-01; FR-06–08; BR-1–4; T01–09; C01,C04.
 \end{itemize}
 \subsection{request\_\allowbreak{}booking}
-Обёртка создания: сохраняет причину отклонения без исключения для ожидаемого конфликта.
+Обёртка создания: возвращает причину отклонения без исключения для ожидаемого конфликта.
 \begin{itemize}
 \item Вход: p\_\allowbreak{}user bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}capability bigint,  p\_\allowbreak{}start timestamptz,p\_\allowbreak{}end timestamptz,p\_\allowbreak{}purpose text.
 \item Выход: booking\_\allowbreak{}id либо error\_\allowbreak{}code.
 \item Ошибки: Ожидаемые 23514/\allowbreak{}23P01 возвращаются; прочие исключения передаются выше.
-\item Гарантии: Запись отказа сохранится только при COMMIT внешней транзакции.
-\item Трассировка: UC-01/\allowbreak{}03; FR-08,22; T38.
+\item Гарантии: Ожидаемый отказ возвращается вызывающему коду; отдельный журнал не создаётся.
+\item Трассировка: UC-01; FR-08; T38.
 \end{itemize}
 \subsection{cancel\_\allowbreak{}booking}
 Владелец либо администратор отменяет будущую активную бронь с причиной.
@@ -76,7 +76,7 @@
 \item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}description text.
 \item Выход: bigint: id сообщения.
 \item Ошибки: 42501: неактивный автор; 23503: нет оборудования.
-\item Гарантии: Сохраняется сообщение и аудит.
+\item Гарантии: Сохраняется сообщение о неисправности.
 \item Трассировка: UC-02; FR-16; T21.
 \end{itemize}
 \subsection{register\_\allowbreak{}unavailability}
@@ -143,10 +143,10 @@
 \item Трассировка: UC-01; FR-21; T43.
 \end{itemize}
 \subsection{equipment\_\allowbreak{}metrics}
-Плановая и фактическая загрузка, объединённый простой, процент утилизации и число отказов за окно.
+Плановая и фактическая загрузка, объединённый простой, процент утилизации за окно.
 \begin{itemize}
 \item Вход: p\_\allowbreak{}window tstzrange.
-\item Выход: equipment\_\allowbreak{}id, planned\_\allowbreak{}seconds, actual\_\allowbreak{}seconds, downtime\_\allowbreak{}seconds, utilization\_\allowbreak{}percent, conflicts.
+\item Выход: equipment\_\allowbreak{}id, planned\_\allowbreak{}seconds, actual\_\allowbreak{}seconds, downtime\_\allowbreak{}seconds, utilization\_\allowbreak{}percent.
 \item Ошибки: 22023: окно не конечное/\allowbreak{}пустое.
 \item Гарантии: Сначала union диапазонов, затем пересечение с окном; без двойного счёта.
 \item Трассировка: UC-03; FR-22,23; T39,56,57.
@@ -157,7 +157,7 @@
 \item Вход: p\_\allowbreak{}actor bigint,p\_\allowbreak{}user bigint,p\_\allowbreak{}type bigint,p\_\allowbreak{}start timestamptz,  p\_\allowbreak{}end timestamptz,p\_\allowbreak{}basis text.
 \item Выход: bigint: id допуска.
 \item Ошибки: 42501: нет роли admin; 23514: интервал; 23503: ссылки.
-\item Гарантии: Допуск и аудит сохраняются в транзакции.
+\item Гарантии: Допуск сохраняется в транзакции.
 \item Трассировка: UC-03; FR-04; BR-1; T45–48.
 \end{itemize}
 \subsection{revoke\_\allowbreak{}admission}

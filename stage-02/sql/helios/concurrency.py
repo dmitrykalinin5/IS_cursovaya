@@ -128,7 +128,7 @@ def run(output):
         UPDATE s466088.lr_app_user SET active=false WHERE login IN ('{tag}','{tag}-staff');
         COMMIT;""")
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps({'fixture':tag,'cleanup':'cancelled and archived; audited history retained','results':results}, ensure_ascii=False, indent=2) + '\n')
+        output.write_text(json.dumps({'fixture':tag,'cleanup':'cancelled and archived; business history retained','results':results}, ensure_ascii=False, indent=2) + '\n')
 
 
 if __name__ == '__main__':

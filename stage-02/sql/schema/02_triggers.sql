@@ -130,8 +130,6 @@ END $$;
 CREATE TRIGGER session_complete AFTER UPDATE ON use_session FOR EACH ROW EXECUTE FUNCTION complete_session();
 CREATE FUNCTION immutable_history() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN RAISE EXCEPTION 'Append-only history' USING ERRCODE='23514'; END $$;
-CREATE TRIGGER audit_immutable BEFORE UPDATE OR DELETE ON audit_event FOR EACH ROW EXECUTE FUNCTION immutable_history();
-CREATE TRIGGER conflict_immutable BEFORE UPDATE OR DELETE ON conflict_event FOR EACH ROW EXECUTE FUNCTION immutable_history();
 CREATE TRIGGER repair_immutable BEFORE UPDATE OR DELETE ON repair FOR EACH ROW EXECUTE FUNCTION immutable_history();
 CREATE FUNCTION technical_guard() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE actor bigint;
@@ -152,28 +150,6 @@ END $$;
 CREATE TRIGGER repair_guard BEFORE INSERT ON repair FOR EACH ROW EXECUTE FUNCTION technical_guard();
 CREATE TRIGGER fault_guard BEFORE INSERT OR UPDATE ON fault_report FOR EACH ROW EXECUTE FUNCTION technical_guard();
 CREATE TRIGGER fault_no_delete BEFORE DELETE ON fault_report FOR EACH ROW EXECUTE FUNCTION immutable_history();
-CREATE FUNCTION audit_change() RETURNS trigger LANGUAGE plpgsql AS $$
-DECLARE oldj jsonb; newj jsonb;
-BEGIN
- IF TG_OP<>'INSERT' THEN oldj:=to_jsonb(OLD); END IF;
- IF TG_OP<>'DELETE' THEN newj:=to_jsonb(NEW); END IF;
- IF TG_TABLE_NAME='equipment' AND oldj-'schedule_revision'=newj-'schedule_revision' THEN RETURN NEW; END IF;
- -- Credential hashes are excluded from audit snapshots.
- oldj:=oldj-'password_hash'; newj:=newj-'password_hash';
- INSERT INTO audit_event(actor_id,table_name,record_key,action,old_data,new_data)
- VALUES(NULLIF(current_setting('labreserve.actor_id',true),'')::bigint,TG_TABLE_NAME,
-   jsonb_build_object('id',COALESCE(newj->'id',oldj->'id'),'key',
-     CASE WHEN COALESCE(newj->'id',oldj->'id') IS NULL THEN COALESCE(newj,oldj) END),
-   TG_OP,oldj,newj);
- RETURN COALESCE(NEW,OLD);
-END $$;
-DO $$ DECLARE t text; BEGIN
- FOREACH t IN ARRAY ARRAY['app_user','user_role','equipment_type','capability','type_capability',
-   'equipment','admission','booking','alternative','unavailability','fault_report','repair','use_session'] LOOP
- EXECUTE format('CREATE TRIGGER audit_%I AFTER INSERT OR UPDATE OR DELETE ON %I FOR EACH ROW EXECUTE FUNCTION audit_change()',t,t);
- END LOOP;
-END $$;
-
 CREATE FUNCTION admission_history() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Revoke instead of deleting admission' USING ERRCODE='23514'; END IF;

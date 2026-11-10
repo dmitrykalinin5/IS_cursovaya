@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-09",
+  "target": "pg/studs/s466088",
+  "server": "18.3",
+  "tables": [
+    "lr_admission",
+    "lr_alternative",
+    "lr_app_role",
+    "lr_app_user",
+    "lr_booking",
+    "lr_capability",
+    "lr_equipment",
+    "lr_equipment_type",
+    "lr_fault_report",
+    "lr_notification",
+    "lr_repair",
+    "lr_type_capability",
+    "lr_unavailability",
+    "lr_use_session",
+    "lr_user_role"
+  ],
+  "counts": {
+    "business": 57,
+    "work_kind": 4,
+    "smoke": 18,
+    "demo": 6,
+    "concurrency": 10
+  },
+  "model_rows_and_unrelated_metadata_preserved": true,
+  "repeat_migration": true,
+  "repeat_install": true,
+  "backup": "/home/studs/s466088/labreserve-stage02-20261109/output/model15-backup-20261109-192430.dump",
+  "backup_sha256": "92e79135638117bda89daa308c4da50a1d56894735b020a326ce2f454e8133db",
+  "source_hash": "0cbca75192457629be4c4526c8fe5cfba6fd839b9191b16d6c07dba8fdcbc387",
+  "directory": "/home/studs/s466088/labreserve-stage02-20261109",
+  "evidence": "Aggregate summary observed from the remote verification process; full logs remain on Helios."
+}

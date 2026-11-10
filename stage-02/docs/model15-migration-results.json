@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-09",
+  "target": "isolated local PostgreSQL 18.6",
+  "tables": [
+    "lr_admission",
+    "lr_alternative",
+    "lr_app_role",
+    "lr_app_user",
+    "lr_booking",
+    "lr_capability",
+    "lr_equipment",
+    "lr_equipment_type",
+    "lr_fault_report",
+    "lr_notification",
+    "lr_repair",
+    "lr_type_capability",
+    "lr_unavailability",
+    "lr_use_session",
+    "lr_user_role"
+  ],
+  "model_rows_and_unrelated_table_unchanged": true,
+  "repeat_migration": true,
+  "repeat_install": true
+}

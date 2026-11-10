@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-09",
+  "local_server": "18.6",
+  "checks": {
+    "business": 60,
+    "work_kind": 4,
+    "recreated_business": 60,
+    "recreated_work_kind": 4,
+    "helios_sim_business": 57,
+    "helios_sim_work_kind": 4,
+    "helios_sim_smoke": 18,
+    "safety": 7,
+    "concurrency": 5,
+    "helios_sim_concurrency": 10
+  },
+  "adapter": 7,
+  "migration": "model15-migration-results.json",
+  "real_server": "model15-helios-results.json"
+}

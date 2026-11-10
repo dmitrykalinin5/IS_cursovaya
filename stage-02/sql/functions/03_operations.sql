@@ -84,7 +84,7 @@ BEGIN
  VALUES(p_user,p_equipment,p_capability,tstzrange(p_start,p_end,'[)'),p_purpose) RETURNING id INTO n;
  RETURN n;
 END $$;
--- Catching inside a subtransaction allows conflict statistics to survive a rejected request.
+-- Return an expected refusal without creating a journal entity.
 CREATE FUNCTION request_booking(p_user bigint,p_equipment bigint,p_capability bigint,
  p_start timestamptz,p_end timestamptz,p_purpose text)
 RETURNS TABLE(booking_id bigint,error_code text) LANGUAGE plpgsql AS $$
@@ -93,10 +93,6 @@ BEGIN
   booking_id:=create_booking(p_user,p_equipment,p_capability,p_start,p_end,p_purpose);
  EXCEPTION WHEN exclusion_violation OR check_violation THEN
   error_code:=SQLSTATE;
-  IF p_end>p_start THEN
-   INSERT INTO conflict_event(user_id,equipment_id,requested_period,error_code)
-   VALUES(p_user,p_equipment,tstzrange(p_start,p_end,'[)'),error_code);
-  END IF;
  END;
  RETURN NEXT;
 END $$;
@@ -217,7 +213,7 @@ BEGIN
 END $$;
 CREATE FUNCTION equipment_metrics(p_window tstzrange)
 RETURNS TABLE(equipment_id bigint,planned_seconds numeric,actual_seconds numeric,
- downtime_seconds numeric,utilization_percent numeric,conflicts bigint)
+ downtime_seconds numeric,utilization_percent numeric)
 LANGUAGE plpgsql STABLE AS $$
 BEGIN
  IF isempty(p_window) OR lower_inf(p_window) OR upper_inf(p_window) THEN
@@ -227,8 +223,7 @@ BEGIN
  (SELECT unnest(range_agg(b.period::tstzrange*p_window)) g FROM booking b
  WHERE b.equipment_id=e.id AND b.status IN ('confirmed','completed') AND b.period && p_window) q),0),
  COALESCE(a.seconds,0), COALESCE(d.seconds,0),
- round(100*COALESCE(a.seconds,0)/extract(epoch FROM upper(p_window)-lower(p_window)),2),
- (SELECT count(*) FROM conflict_event c WHERE c.equipment_id=e.id AND p_window @> c.occurred_at)
+ round(100*COALESCE(a.seconds,0)/extract(epoch FROM upper(p_window)-lower(p_window)),2)
  FROM equipment e
  LEFT JOIN LATERAL (SELECT sum(extract(epoch FROM upper(g)-lower(g))) seconds FROM
   (SELECT unnest(range_agg(tstzrange(s.started_at,COALESCE(s.ended_at,statement_timestamp()),'[)')*p_window)) g

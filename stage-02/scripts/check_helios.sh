@@ -11,6 +11,6 @@ case "${1:-}" in
  --concurrency)
   mkdir -p output
   bash scripts/helios_python.sh sql/helios/concurrency.py --output output/helios-concurrency.json
-  echo 'PASS: concurrent probes cancelled/archived; audited probe history retained' ;;
+  echo 'PASS: concurrent probes cancelled/archived; business probe history retained' ;;
  *) echo 'Usage: check_helios.sh [--concurrency]' >&2; exit 2 ;;
 esac

@@ -109,17 +109,3 @@ CREATE TABLE notification (
  kind text NOT NULL CHECK (kind IN ('transfer_required','transferred','cancelled','reminder')),
  message text NOT NULL, created_at timestamptz NOT NULL DEFAULT clock_timestamp(), read_at timestamptz
 );
-CREATE TABLE audit_event (
- id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
- actor_id bigint REFERENCES app_user ON DELETE RESTRICT ON UPDATE RESTRICT,
- table_name text NOT NULL, record_key jsonb NOT NULL, action text NOT NULL,
- old_data jsonb, new_data jsonb, occurred_at timestamptz NOT NULL DEFAULT clock_timestamp(),
- transaction_id bigint NOT NULL DEFAULT txid_current()
-);
-CREATE TABLE conflict_event (
- id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
- user_id bigint NOT NULL REFERENCES app_user ON DELETE RESTRICT ON UPDATE RESTRICT,
- equipment_id bigint NOT NULL REFERENCES equipment ON DELETE RESTRICT ON UPDATE RESTRICT,
- requested_period time_window NOT NULL CHECK (NOT upper_inf(requested_period)),
- error_code text NOT NULL, occurred_at timestamptz NOT NULL DEFAULT clock_timestamp()
-);

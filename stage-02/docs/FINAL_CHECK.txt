@@ -1,8 +1,7 @@
-2026-10-27 — согласованная модель
-13 conceptual entities; 20 links; 2 M:N; 17 tables; 27 FK; 32 functions; 25 triggers; 38 indexes.
-Local: 60+4 assertions, recreate 60+4, concurrency 5/5.
-Helios LOCAL simulation: 57+4 assertions, smoke 18/18, concurrency 10/10, adapter 7/7.
-Migration: business data and unrelated fixture preserved; repeat migration/install passed.
-Defense: LOCAL and Helios simulation, six checks each, ROLLBACK.
-Report: 35 pages, XeLaTeX; details in VISUAL_QA.md.
-Real Helios PostgreSQL 18.3 updated; 57+4 SQL, 18 smoke, 10 concurrency, 6 demo checks; data preserved; repeat migration/install passed.
+2026-11-10 — all eight stage-02 requirements checked
+13 entities + 2 M:N = 15 tables; 24 FK; 31 functions; 10 triggers; 34 LOCAL indexes.
+All 83 editable XML attributes match PostgreSQL: name/type/PK/FK/NULL.
+Actual test database DROP/CREATE and restore; 60+4 SQL assertions; clean rebuild 60+4; concurrency 5/5; demo 6/6; adapter 7/7.
+Corrupted key marker is detected without editing source XML.
+Report: 33 pages, XeLaTeX; source/SQL/stage-01 protected.
+Real Helios verified 2026-11-09: model15-helios-results.json.

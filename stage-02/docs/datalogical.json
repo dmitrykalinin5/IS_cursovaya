@@ -691,21 +691,6 @@
             ],
             "constraints": [
                 {
-                    "kind": "n",
-                    "name": "booking_user_id_not_null",
-                    "definition": "NOT NULL user_id"
-                },
-                {
-                    "kind": "n",
-                    "name": "booking_equipment_id_not_null",
-                    "definition": "NOT NULL equipment_id"
-                },
-                {
-                    "kind": "n",
-                    "name": "booking_capability_id_not_null",
-                    "definition": "NOT NULL capability_id"
-                },
-                {
                     "kind": "c",
                     "name": "booking_period_check",
                     "definition": "CHECK ((NOT upper_inf((period)::tstzrange)))"
@@ -724,6 +709,21 @@
                     "kind": "n",
                     "name": "booking_id_not_null",
                     "definition": "NOT NULL id"
+                },
+                {
+                    "kind": "n",
+                    "name": "booking_user_id_not_null",
+                    "definition": "NOT NULL user_id"
+                },
+                {
+                    "kind": "n",
+                    "name": "booking_equipment_id_not_null",
+                    "definition": "NOT NULL equipment_id"
+                },
+                {
+                    "kind": "n",
+                    "name": "booking_capability_id_not_null",
+                    "definition": "NOT NULL capability_id"
                 },
                 {
                     "kind": "n",
@@ -1541,248 +1541,45 @@
                     "definition": "FOREIGN KEY (booking_id) REFERENCES labreserve.booking(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
                 }
             ]
-        },
-        {
-            "name": "audit_event",
-            "columns": [
-                {
-                    "udt": "int8",
-                    "name": "id",
-                    "type": "bigint",
-                    "domain": null,
-                    "default": null,
-                    "identity": "YES",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "int8",
-                    "name": "actor_id",
-                    "type": "bigint",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "YES"
-                },
-                {
-                    "udt": "text",
-                    "name": "table_name",
-                    "type": "text",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "jsonb",
-                    "name": "record_key",
-                    "type": "jsonb",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "text",
-                    "name": "action",
-                    "type": "text",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "jsonb",
-                    "name": "old_data",
-                    "type": "jsonb",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "YES"
-                },
-                {
-                    "udt": "jsonb",
-                    "name": "new_data",
-                    "type": "jsonb",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "YES"
-                },
-                {
-                    "udt": "timestamptz",
-                    "name": "occurred_at",
-                    "type": "timestamp with time zone",
-                    "domain": null,
-                    "default": "clock_timestamp()",
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "int8",
-                    "name": "transaction_id",
-                    "type": "bigint",
-                    "domain": null,
-                    "default": "txid_current()",
-                    "identity": "NO",
-                    "nullable": "NO"
-                }
-            ],
-            "constraints": [
-                {
-                    "kind": "n",
-                    "name": "audit_event_id_not_null",
-                    "definition": "NOT NULL id"
-                },
-                {
-                    "kind": "n",
-                    "name": "audit_event_table_name_not_null",
-                    "definition": "NOT NULL table_name"
-                },
-                {
-                    "kind": "n",
-                    "name": "audit_event_record_key_not_null",
-                    "definition": "NOT NULL record_key"
-                },
-                {
-                    "kind": "n",
-                    "name": "audit_event_action_not_null",
-                    "definition": "NOT NULL action"
-                },
-                {
-                    "kind": "n",
-                    "name": "audit_event_occurred_at_not_null",
-                    "definition": "NOT NULL occurred_at"
-                },
-                {
-                    "kind": "n",
-                    "name": "audit_event_transaction_id_not_null",
-                    "definition": "NOT NULL transaction_id"
-                },
-                {
-                    "kind": "p",
-                    "name": "audit_event_pkey",
-                    "definition": "PRIMARY KEY (id)"
-                },
-                {
-                    "kind": "f",
-                    "name": "audit_event_actor_id_fkey",
-                    "definition": "FOREIGN KEY (actor_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
-                }
-            ]
-        },
-        {
-            "name": "conflict_event",
-            "columns": [
-                {
-                    "udt": "int8",
-                    "name": "id",
-                    "type": "bigint",
-                    "domain": null,
-                    "default": null,
-                    "identity": "YES",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "int8",
-                    "name": "user_id",
-                    "type": "bigint",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "int8",
-                    "name": "equipment_id",
-                    "type": "bigint",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "tstzrange",
-                    "name": "requested_period",
-                    "type": "tstzrange",
-                    "domain": "time_window",
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "text",
-                    "name": "error_code",
-                    "type": "text",
-                    "domain": null,
-                    "default": null,
-                    "identity": "NO",
-                    "nullable": "NO"
-                },
-                {
-                    "udt": "timestamptz",
-                    "name": "occurred_at",
-                    "type": "timestamp with time zone",
-                    "domain": null,
-                    "default": "clock_timestamp()",
-                    "identity": "NO",
-                    "nullable": "NO"
-                }
-            ],
-            "constraints": [
-                {
-                    "kind": "c",
-                    "name": "conflict_event_requested_period_check",
-                    "definition": "CHECK ((NOT upper_inf((requested_period)::tstzrange)))"
-                },
-                {
-                    "kind": "n",
-                    "name": "conflict_event_id_not_null",
-                    "definition": "NOT NULL id"
-                },
-                {
-                    "kind": "n",
-                    "name": "conflict_event_user_id_not_null",
-                    "definition": "NOT NULL user_id"
-                },
-                {
-                    "kind": "n",
-                    "name": "conflict_event_equipment_id_not_null",
-                    "definition": "NOT NULL equipment_id"
-                },
-                {
-                    "kind": "n",
-                    "name": "conflict_event_requested_period_not_null",
-                    "definition": "NOT NULL requested_period"
-                },
-                {
-                    "kind": "n",
-                    "name": "conflict_event_error_code_not_null",
-                    "definition": "NOT NULL error_code"
-                },
-                {
-                    "kind": "n",
-                    "name": "conflict_event_occurred_at_not_null",
-                    "definition": "NOT NULL occurred_at"
-                },
-                {
-                    "kind": "p",
-                    "name": "conflict_event_pkey",
-                    "definition": "PRIMARY KEY (id)"
-                },
-                {
-                    "kind": "f",
-                    "name": "conflict_event_user_id_fkey",
-                    "definition": "FOREIGN KEY (user_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
-                },
-                {
-                    "kind": "f",
-                    "name": "conflict_event_equipment_id_fkey",
-                    "definition": "FOREIGN KEY (equipment_id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
-                }
-            ]
         }
     ],
     "indexes": [
+        {
+            "name": "ix_admission_valid",
+            "definition": "CREATE INDEX ix_admission_valid ON labreserve.admission USING gist (user_id, type_id, ((valid_during)::tstzrange)) WHERE (revoked_at IS NULL)"
+        },
+        {
+            "name": "ix_booking_user_future",
+            "definition": "CREATE INDEX ix_booking_user_future ON labreserve.booking USING btree (user_id, lower((period)::tstzrange)) WHERE (status = ANY (ARRAY['confirmed'::text, 'needs_transfer'::text]))"
+        },
+        {
+            "name": "ix_booking_equipment_period",
+            "definition": "CREATE INDEX ix_booking_equipment_period ON labreserve.booking USING gist (equipment_id, ((period)::tstzrange))"
+        },
+        {
+            "name": "ix_unavailability_period",
+            "definition": "CREATE INDEX ix_unavailability_period ON labreserve.unavailability USING gist (equipment_id, ((period)::tstzrange)) WHERE (status <> 'cancelled'::text)"
+        },
+        {
+            "name": "ix_alternative_booking_rank",
+            "definition": "CREATE INDEX ix_alternative_booking_rank ON labreserve.alternative USING btree (booking_id, priority, lower((period)::tstzrange)) WHERE (state = 'offered'::text)"
+        },
+        {
+            "name": "ix_fault_equipment_time",
+            "definition": "CREATE INDEX ix_fault_equipment_time ON labreserve.fault_report USING btree (equipment_id, reported_at DESC)"
+        },
+        {
+            "name": "ix_repair_unavailability",
+            "definition": "CREATE INDEX ix_repair_unavailability ON labreserve.repair USING btree (unavailability_id, lower((period)::tstzrange) DESC)"
+        },
+        {
+            "name": "ix_notification_unread",
+            "definition": "CREATE INDEX ix_notification_unread ON labreserve.notification USING btree (user_id, created_at) WHERE (read_at IS NULL)"
+        },
+        {
+            "name": "ux_notification_reminder",
+            "definition": "CREATE UNIQUE INDEX ux_notification_reminder ON labreserve.notification USING btree (booking_id, kind) WHERE (kind = 'reminder'::text)"
+        },
         {
             "name": "app_user_pkey",
             "definition": "CREATE UNIQUE INDEX app_user_pkey ON labreserve.app_user USING btree (id)"
@@ -1876,64 +1673,12 @@
             "definition": "CREATE UNIQUE INDEX notification_pkey ON labreserve.notification USING btree (id)"
         },
         {
-            "name": "audit_event_pkey",
-            "definition": "CREATE UNIQUE INDEX audit_event_pkey ON labreserve.audit_event USING btree (id)"
-        },
-        {
-            "name": "conflict_event_pkey",
-            "definition": "CREATE UNIQUE INDEX conflict_event_pkey ON labreserve.conflict_event USING btree (id)"
-        },
-        {
             "name": "ix_equipment_type_active",
             "definition": "CREATE INDEX ix_equipment_type_active ON labreserve.equipment USING btree (type_id, id) WHERE (NOT archived)"
         },
         {
             "name": "ix_type_capability_reverse",
             "definition": "CREATE INDEX ix_type_capability_reverse ON labreserve.type_capability USING btree (capability_id, type_id)"
-        },
-        {
-            "name": "ix_admission_valid",
-            "definition": "CREATE INDEX ix_admission_valid ON labreserve.admission USING gist (user_id, type_id, ((valid_during)::tstzrange)) WHERE (revoked_at IS NULL)"
-        },
-        {
-            "name": "ix_booking_user_future",
-            "definition": "CREATE INDEX ix_booking_user_future ON labreserve.booking USING btree (user_id, lower((period)::tstzrange)) WHERE (status = ANY (ARRAY['confirmed'::text, 'needs_transfer'::text]))"
-        },
-        {
-            "name": "ix_booking_equipment_period",
-            "definition": "CREATE INDEX ix_booking_equipment_period ON labreserve.booking USING gist (equipment_id, ((period)::tstzrange))"
-        },
-        {
-            "name": "ix_unavailability_period",
-            "definition": "CREATE INDEX ix_unavailability_period ON labreserve.unavailability USING gist (equipment_id, ((period)::tstzrange)) WHERE (status <> 'cancelled'::text)"
-        },
-        {
-            "name": "ix_alternative_booking_rank",
-            "definition": "CREATE INDEX ix_alternative_booking_rank ON labreserve.alternative USING btree (booking_id, priority, lower((period)::tstzrange)) WHERE (state = 'offered'::text)"
-        },
-        {
-            "name": "ix_fault_equipment_time",
-            "definition": "CREATE INDEX ix_fault_equipment_time ON labreserve.fault_report USING btree (equipment_id, reported_at DESC)"
-        },
-        {
-            "name": "ix_repair_unavailability",
-            "definition": "CREATE INDEX ix_repair_unavailability ON labreserve.repair USING btree (unavailability_id, lower((period)::tstzrange) DESC)"
-        },
-        {
-            "name": "ix_audit_record_time",
-            "definition": "CREATE INDEX ix_audit_record_time ON labreserve.audit_event USING btree (table_name, ((record_key ->> 'id'::text)), occurred_at DESC)"
-        },
-        {
-            "name": "ix_notification_unread",
-            "definition": "CREATE INDEX ix_notification_unread ON labreserve.notification USING btree (user_id, created_at) WHERE (read_at IS NULL)"
-        },
-        {
-            "name": "ux_notification_reminder",
-            "definition": "CREATE UNIQUE INDEX ux_notification_reminder ON labreserve.notification USING btree (booking_id, kind) WHERE (kind = 'reminder'::text)"
-        },
-        {
-            "name": "ix_conflict_equipment_time",
-            "definition": "CREATE INDEX ix_conflict_equipment_time ON labreserve.conflict_event USING btree (equipment_id, occurred_at)"
         }
     ],
     "triggers": [
@@ -1963,16 +1708,6 @@
             "definition": "CREATE TRIGGER session_complete AFTER UPDATE ON labreserve.use_session FOR EACH ROW EXECUTE FUNCTION labreserve.complete_session()"
         },
         {
-            "name": "audit_immutable",
-            "table": "audit_event",
-            "definition": "CREATE TRIGGER audit_immutable BEFORE DELETE OR UPDATE ON labreserve.audit_event FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
-        },
-        {
-            "name": "conflict_immutable",
-            "table": "conflict_event",
-            "definition": "CREATE TRIGGER conflict_immutable BEFORE DELETE OR UPDATE ON labreserve.conflict_event FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
-        },
-        {
             "name": "repair_immutable",
             "table": "repair",
             "definition": "CREATE TRIGGER repair_immutable BEFORE DELETE OR UPDATE ON labreserve.repair FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
@@ -1993,71 +1728,6 @@
             "definition": "CREATE TRIGGER fault_no_delete BEFORE DELETE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.immutable_history()"
         },
         {
-            "name": "audit_app_user",
-            "table": "app_user",
-            "definition": "CREATE TRIGGER audit_app_user AFTER INSERT OR DELETE OR UPDATE ON labreserve.app_user FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_user_role",
-            "table": "user_role",
-            "definition": "CREATE TRIGGER audit_user_role AFTER INSERT OR DELETE OR UPDATE ON labreserve.user_role FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_equipment_type",
-            "table": "equipment_type",
-            "definition": "CREATE TRIGGER audit_equipment_type AFTER INSERT OR DELETE OR UPDATE ON labreserve.equipment_type FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_capability",
-            "table": "capability",
-            "definition": "CREATE TRIGGER audit_capability AFTER INSERT OR DELETE OR UPDATE ON labreserve.capability FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_type_capability",
-            "table": "type_capability",
-            "definition": "CREATE TRIGGER audit_type_capability AFTER INSERT OR DELETE OR UPDATE ON labreserve.type_capability FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_equipment",
-            "table": "equipment",
-            "definition": "CREATE TRIGGER audit_equipment AFTER INSERT OR DELETE OR UPDATE ON labreserve.equipment FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_admission",
-            "table": "admission",
-            "definition": "CREATE TRIGGER audit_admission AFTER INSERT OR DELETE OR UPDATE ON labreserve.admission FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_booking",
-            "table": "booking",
-            "definition": "CREATE TRIGGER audit_booking AFTER INSERT OR DELETE OR UPDATE ON labreserve.booking FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_alternative",
-            "table": "alternative",
-            "definition": "CREATE TRIGGER audit_alternative AFTER INSERT OR DELETE OR UPDATE ON labreserve.alternative FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_unavailability",
-            "table": "unavailability",
-            "definition": "CREATE TRIGGER audit_unavailability AFTER INSERT OR DELETE OR UPDATE ON labreserve.unavailability FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_fault_report",
-            "table": "fault_report",
-            "definition": "CREATE TRIGGER audit_fault_report AFTER INSERT OR DELETE OR UPDATE ON labreserve.fault_report FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_repair",
-            "table": "repair",
-            "definition": "CREATE TRIGGER audit_repair AFTER INSERT OR DELETE OR UPDATE ON labreserve.repair FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
-            "name": "audit_use_session",
-            "table": "use_session",
-            "definition": "CREATE TRIGGER audit_use_session AFTER INSERT OR DELETE OR UPDATE ON labreserve.use_session FOR EACH ROW EXECUTE FUNCTION labreserve.audit_change()"
-        },
-        {
             "name": "admission_guard",
             "table": "admission",
             "definition": "CREATE TRIGGER admission_guard BEFORE DELETE OR UPDATE ON labreserve.admission FOR EACH ROW EXECUTE FUNCTION labreserve.admission_history()"
@@ -2065,19 +1735,34 @@
     ],
     "functions": [
         {
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.grant_admission(bigint,bigint,bigint,timestamp with time zone,timestamp with time zone,text)"
+        },
+        {
+            "result": "void",
+            "definer": true,
+            "signature": "labreserve.revoke_admission(bigint,bigint)"
+        },
+        {
             "result": "trigger",
             "definer": false,
-            "signature": "labreserve.immutable_history()"
+            "signature": "labreserve.complete_session()"
         },
         {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.report_fault(bigint,bigint,text)"
+            "result": "trigger",
+            "definer": false,
+            "signature": "labreserve.check_unavailability()"
         },
         {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.open_session(bigint,bigint)"
+            "result": "void",
+            "definer": false,
+            "signature": "labreserve.assert_owner(bigint,bigint)"
+        },
+        {
+            "result": "void",
+            "definer": false,
+            "signature": "labreserve.lock_equipment(bigint)"
         },
         {
             "result": "boolean",
@@ -2095,16 +1780,6 @@
             "signature": "labreserve.check_booking()"
         },
         {
-            "result": "SETOF labreserve.equipment",
-            "definer": false,
-            "signature": "labreserve.equivalent_equipment(bigint,bigint,tstzrange)"
-        },
-        {
-            "result": "trigger",
-            "definer": false,
-            "signature": "labreserve.check_unavailability()"
-        },
-        {
             "result": "trigger",
             "definer": false,
             "signature": "labreserve.impact_bookings()"
@@ -2117,27 +1792,7 @@
         {
             "result": "trigger",
             "definer": false,
-            "signature": "labreserve.complete_session()"
-        },
-        {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.register_unavailability(bigint,bigint,text,timestamp with time zone,timestamp with time zone,text,bigint)"
-        },
-        {
-            "result": "void",
-            "definer": true,
-            "signature": "labreserve.edit_maintenance(bigint,bigint,timestamp with time zone,timestamp with time zone,text,boolean)"
-        },
-        {
-            "result": "text",
-            "definer": false,
-            "signature": "labreserve.equipment_state(bigint,timestamp with time zone)"
-        },
-        {
-            "result": "void",
-            "definer": false,
-            "signature": "labreserve.lock_equipment(bigint)"
+            "signature": "labreserve.immutable_history()"
         },
         {
             "result": "trigger",
@@ -2147,22 +1802,22 @@
         {
             "result": "trigger",
             "definer": false,
-            "signature": "labreserve.audit_change()"
-        },
-        {
-            "result": "trigger",
-            "definer": false,
             "signature": "labreserve.admission_history()"
-        },
-        {
-            "result": "void",
-            "definer": false,
-            "signature": "labreserve.assert_owner(bigint,bigint)"
         },
         {
             "result": "SETOF tstzrange",
             "definer": false,
             "signature": "labreserve.free_intervals(bigint,tstzrange,bigint)"
+        },
+        {
+            "result": "SETOF labreserve.equipment",
+            "definer": false,
+            "signature": "labreserve.equivalent_equipment(bigint,bigint,tstzrange)"
+        },
+        {
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.report_fault(bigint,bigint,text)"
         },
         {
             "result": "TABLE(equipment_id bigint, period tstzrange, priority smallint)",
@@ -2190,14 +1845,34 @@
             "signature": "labreserve.cancel_booking(bigint,bigint,text)"
         },
         {
+            "result": "text",
+            "definer": false,
+            "signature": "labreserve.equipment_state(bigint,timestamp with time zone)"
+        },
+        {
             "result": "void",
             "definer": true,
             "signature": "labreserve.select_alternative(bigint,bigint)"
         },
         {
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.register_unavailability(bigint,bigint,text,timestamp with time zone,timestamp with time zone,text,bigint)"
+        },
+        {
+            "result": "void",
+            "definer": true,
+            "signature": "labreserve.edit_maintenance(bigint,bigint,timestamp with time zone,timestamp with time zone,text,boolean)"
+        },
+        {
             "result": "text",
             "definer": true,
             "signature": "labreserve.resolve_unavailability(bigint,bigint,text)"
+        },
+        {
+            "result": "bigint",
+            "definer": true,
+            "signature": "labreserve.open_session(bigint,bigint)"
         },
         {
             "result": "void",
@@ -2210,19 +1885,9 @@
             "signature": "labreserve.create_reminders(timestamp with time zone)"
         },
         {
-            "result": "TABLE(equipment_id bigint, planned_seconds numeric, actual_seconds numeric, downtime_seconds numeric, utilization_percent numeric, conflicts bigint)",
+            "result": "TABLE(equipment_id bigint, planned_seconds numeric, actual_seconds numeric, downtime_seconds numeric, utilization_percent numeric)",
             "definer": false,
             "signature": "labreserve.equipment_metrics(tstzrange)"
-        },
-        {
-            "result": "bigint",
-            "definer": true,
-            "signature": "labreserve.grant_admission(bigint,bigint,bigint,timestamp with time zone,timestamp with time zone,text)"
-        },
-        {
-            "result": "void",
-            "definer": true,
-            "signature": "labreserve.revoke_admission(bigint,bigint)"
         }
     ],
     "foreign_keys": [
@@ -2369,24 +2034,6 @@
             "from": "labreserve.notification",
             "name": "notification_booking_id_fkey",
             "definition": "FOREIGN KEY (booking_id) REFERENCES labreserve.booking(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
-        },
-        {
-            "to": "labreserve.app_user",
-            "from": "labreserve.audit_event",
-            "name": "audit_event_actor_id_fkey",
-            "definition": "FOREIGN KEY (actor_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
-        },
-        {
-            "to": "labreserve.app_user",
-            "from": "labreserve.conflict_event",
-            "name": "conflict_event_user_id_fkey",
-            "definition": "FOREIGN KEY (user_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
-        },
-        {
-            "to": "labreserve.equipment",
-            "from": "labreserve.conflict_event",
-            "name": "conflict_event_equipment_id_fkey",
-            "definition": "FOREIGN KEY (equipment_id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT"
         }
     ]
 }

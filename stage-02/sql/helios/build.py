@@ -66,14 +66,7 @@ def triggers(gist):
      AND b.period && NEW.period::tstzrange) THEN
    RAISE EXCEPTION 'Conflicting confirmed booking' USING ERRCODE='23P01';
   END IF;""")
-    start = text.index('DO $$ DECLARE t text; BEGIN')
-    end = text.index('END $$;', start) + len('END $$;')
-    audited = ['app_user', 'user_role', 'equipment_type', 'capability', 'type_capability',
-               'equipment', 'admission', 'booking', 'alternative', 'unavailability',
-               'fault_report', 'repair', 'use_session']
-    # Explicit names avoid a schema-wide loop and dynamic trigger name collisions.
-    audit = '\n'.join(f'CREATE TRIGGER lr_audit_{t} AFTER INSERT OR UPDATE OR DELETE ON {t} FOR EACH ROW EXECUTE FUNCTION audit_change();' for t in audited)
-    return adapt(text[:start] + audit + text[end:])
+    return adapt(text)
 
 
 def operations():
@@ -112,7 +105,7 @@ def indexes(gist):
 def build(destination):
     destination.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(Path(__file__).read_bytes() + b''.join(v.encode() for v in SOURCES.values())
-                            + b''.join(p.read_bytes() for p in [Path(__file__).parent / n for n in ['preflight.sql', 'install.sql', 'smoke_tests.sql', 'fingerprint.sql']])).hexdigest()
+                            + b''.join(p.read_bytes() for p in [Path(__file__).parent / n for n in ['preflight.sql', 'install.sql', 'smoke_tests.sql', 'fingerprint.sql', 'manifest.sql']])).hexdigest()
     for mode in ['gist', 'trigger']:
         use_gist = mode == 'gist'
         (destination / f'{mode}.sql').write_text(schema(use_gist) + triggers(use_gist) + operations() + indexes(use_gist))
@@ -122,9 +115,9 @@ def build(destination):
     (destination / 'seed.sql').write_text(adapt(seed))
     # Reuse the 57 business assertions; omit CREATEROLE and local-only ACL tests.
     tests = (ROOT / 'sql/tests/06_assertions.sql').read_text().split('CREATE ROLE labreserve_stage02_probe')[0]
-    tests = tests.replace("table_schema='labreserve' AND table_type='BASE TABLE'", "table_schema='labreserve' AND table_type='BASE TABLE' AND table_name LIKE 'lr\\_%' ESCAPE '\\' AND table_name<>'lr_deployment'")
+    tests = tests.replace("table_schema='labreserve' AND table_type='BASE TABLE'", "table_schema='labreserve' AND table_type='BASE TABLE' AND table_name LIKE 'lr\\_%' ESCAPE '\\'")
     (destination / 'assertions.sql').write_text(adapt(tests) + 'ROLLBACK;\n')
-    for name in ['preflight.sql', 'install.sql', 'smoke_tests.sql', 'fingerprint.sql']:
+    for name in ['preflight.sql', 'install.sql', 'smoke_tests.sql', 'fingerprint.sql', 'manifest.sql']:
         (destination / name).write_text((Path(__file__).parent / name).read_text())
     (destination / 'version.sql').write_text(f"\\set source_hash {digest}\n")
     print('Built Helios bundle:', destination, 'source', digest)

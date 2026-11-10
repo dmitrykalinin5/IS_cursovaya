@@ -36,10 +36,10 @@ psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T31 duplicate session SQLST
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T32 session closure completes booking
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T33 double close rejected SQLSTATE=23514
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T34 immutable completed booking SQLSTATE=23514
-psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T35 immutable audit SQLSTATE=23514
-psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T36 audit records meaningful changes
+psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T35 no audit entity
+psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T36 no conflict entity
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T37 time zone equivalence
-psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T38 rejected request recorded
+psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T38 refusal returned without journal
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T39 clipped union downtime metrics
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T40 equivalent function across types
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T41 booking history not deletable SQLSTATE=23514
@@ -56,7 +56,7 @@ psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T51 downtime history retain
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T52 administrative closure needs comment SQLSTATE=23514
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T53 administrative closure comment retained
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T54 inclusive upper bound rejected SQLSTATE=23514
-psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T55 17 physical tables
+psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T55 15 physical tables
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T56 overlapping downtime counted as union
 psql:sql/tests/06_assertions.sql:107: NOTICE:  PASS: T57 actual duration differs from planned hour
 DO

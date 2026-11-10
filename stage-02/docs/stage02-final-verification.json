@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-10",
+  "local_server": "18.6",
+  "required_steps": 8,
+  "tables": 15,
+  "foreign_keys": 24,
+  "verified_xml_attributes": 83,
+  "checks": {
+    "sql": 60,
+    "model_rules": 4,
+    "recreated_sql": 60,
+    "recreated_model_rules": 4,
+    "demo": 6,
+    "concurrency": 5
+  },
+  "adapter": 7,
+  "database_drop_create_and_restore": true,
+  "corrupt_key_marker_detected": true,
+  "report_pages": 33,
+  "real_helios_evidence": {
+    "verified_on": "2026-11-09",
+    "path": "model15-helios-results.json"
+  }
+}

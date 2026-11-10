@@ -8,7 +8,5 @@ CREATE INDEX ix_unavailability_period ON unavailability USING gist(equipment_id,
 CREATE INDEX ix_alternative_booking_rank ON alternative(booking_id,priority,lower(period)) WHERE state='offered';
 CREATE INDEX ix_fault_equipment_time ON fault_report(equipment_id,reported_at DESC);
 CREATE INDEX ix_repair_unavailability ON repair(unavailability_id,lower(period) DESC);
-CREATE INDEX ix_audit_record_time ON audit_event(table_name,((record_key->>'id')),occurred_at DESC);
 CREATE INDEX ix_notification_unread ON notification(user_id,created_at) WHERE read_at IS NULL;
 CREATE UNIQUE INDEX ux_notification_reminder ON notification(booking_id,kind) WHERE kind='reminder';
-CREATE INDEX ix_conflict_equipment_time ON conflict_event(equipment_id,occurred_at);

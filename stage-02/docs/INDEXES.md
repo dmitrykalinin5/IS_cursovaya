@@ -1,26 +1,6 @@
 # Индексы
 
-13 явных индексов; 25 автоматически созданных для PK/UNIQUE/EXCLUDE, всего 38. Каждый индекс требует места, WAL и обновления при записи. FK сами не создают индекс. Полные определения ниже.
-
-## `ix_equipment_type_active`
-
-```sql
-CREATE INDEX ix_equipment_type_active ON labreserve.equipment USING btree (type_id, id) WHERE (NOT archived);
-```
-
-- Тип: B-tree, частичный.
-- Запрос: Фильтр активного каталога по типу; компактнее полного индекса.
-- Цена/ограничения: Архивирование меняет состав; для всех строк не используется.
-
-## `ix_type_capability_reverse`
-
-```sql
-CREATE INDEX ix_type_capability_reverse ON labreserve.type_capability USING btree (capability_id, type_id);
-```
-
-- Тип: B-tree, составной.
-- Запрос: Поиск типов по функции; PK начинается с type_id.
-- Цена/ограничения: Дополнительная запись при изменении M:N.
+11 явных индексов; 23 автоматически созданных для PK/UNIQUE/EXCLUDE, всего 34. Каждый индекс требует места, WAL и обновления при записи. FK сами не создают индекс. Полные определения ниже.
 
 ## `ix_admission_valid`
 
@@ -92,16 +72,6 @@ CREATE INDEX ix_repair_unavailability ON labreserve.repair USING btree (unavaila
 - Запрос: История работ по причине недоступности.
 - Цена/ограничения: Дополнительная стоимость append-only вставки.
 
-## `ix_audit_record_time`
-
-```sql
-CREATE INDEX ix_audit_record_time ON labreserve.audit_event USING btree (table_name, ((record_key ->> 'id'::text)), occurred_at DESC);
-```
-
-- Тип: B-tree, выражение.
-- Запрос: История объекта по имени таблицы, id и времени.
-- Цена/ограничения: JSONB ключ вычисляется на вставке; для связующих пар id NULL, нужен иной запрос.
-
 ## `ix_notification_unread`
 
 ```sql
@@ -122,15 +92,25 @@ CREATE UNIQUE INDEX ux_notification_reminder ON labreserve.notification USING bt
 - Запрос: Идемпотентный запуск планировщика.
 - Цена/ограничения: Одна запись reminder на бронь; после переноса повторная политика требует уточнения.
 
-## `ix_conflict_equipment_time`
+## `ix_equipment_type_active`
 
 ```sql
-CREATE INDEX ix_conflict_equipment_time ON labreserve.conflict_event USING btree (equipment_id, occurred_at);
+CREATE INDEX ix_equipment_type_active ON labreserve.equipment USING btree (type_id, id) WHERE (NOT archived);
+```
+
+- Тип: B-tree, частичный.
+- Запрос: Фильтр активного каталога по типу; компактнее полного индекса.
+- Цена/ограничения: Архивирование меняет состав; для всех строк не используется.
+
+## `ix_type_capability_reverse`
+
+```sql
+CREATE INDEX ix_type_capability_reverse ON labreserve.type_capability USING btree (capability_id, type_id);
 ```
 
 - Тип: B-tree, составной.
-- Запрос: Отказы по оборудованию и времени события.
-- Цена/ограничения: Статистика отражает только API request_booking.
+- Запрос: Поиск типов по функции; PK начинается с type_id.
+- Цена/ограничения: Дополнительная запись при изменении M:N.
 
 ## Автоматические индексы
 

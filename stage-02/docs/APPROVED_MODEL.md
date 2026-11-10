@@ -1,37 +1,23 @@
-# Согласованная модель и её реализация
+# Соответствие согласованной модели PostgreSQL
 
-Основа второго этапа — `../ER-модель_final.drawio.xml` и соответствующая PNG из каталога `stage-02`. Пользователь подтвердил согласование с преподавателем 27.10.2026. Оригиналы не изменяются.
+Согласованный источник: `../ER-модель_final.drawio.xml/png`. Редактируемая даталогическая схема: `../diagrams/logical.xml`. Исходная компоновка сохранена; XML не перезаписывается генератором.
 
-Для показа в draw.io: `../ER-модель_final.drawio.xml`. Изображение: `../ER-модель_final.drawio.png`. На модели 13 сущностей, 20 линий и две M:N.
-
-| Сущность | Таблица PostgreSQL | Атрибуты и реализация |
+| Сущность | Таблица | Основные атрибуты |
 |---|---|---|
-| Пользователь | app_user | id, login, full_name, active; password_hash и created_at — детали реализации |
-| Роль | app_role | code — первичный ключ |
-| Допуск | admission | id, valid_during, basis, revoked_at; user_id и type_id реализуют связи; granted_by фиксирует выдавшего |
+| Пользователь | app_user | id, login, full_name, active |
+| Роль | app_role | code |
+| Допуск | admission | id, valid_during, basis, revoked_at |
 | Тип оборудования | equipment_type | id, name, archived |
-| Единица оборудования | equipment | id, inventory_no, name, characteristics; type_id, archived и schedule_revision — связи и технические поля |
+| Единица оборудования | equipment | id, inventory_no, name, characteristics |
 | Функция оборудования | capability | id, name |
-| Бронирование | booking | id, period, purpose, status; ссылки user_id, equipment_id, capability_id |
-| Предложение переноса | alternative | id, period, priority, state; booking_id и equipment_id |
-| Сеанс использования оборудования | use_session | id, started_at, ended_at, close_comment; уникальный booking_id |
-| Уведомление | notification | id, kind, message, created_at, read_at; user_id и необязательный booking_id |
-| Сообщение о неисправности | fault_report | id, description, reported_at, state; equipment_id и reported_by |
-| Техническое событие | unavailability | id, kind, period, reason, status; equipment_id, fault_report_id, created_by, resolved_by |
-| Техническая работа | repair | id, work_kind, period, result; unavailability_id и performed_by |
+| Бронирование | booking | id, period, purpose, status |
+| Предложение переноса | alternative | id, period, priority, state |
+| Сеанс использования | use_session | id, started_at, ended_at, close_comment |
+| Уведомление | notification | id, kind, message, created_at, read_at |
+| Сообщение о неисправности | fault_report | id, description, reported_at, state |
+| Техническое событие | unavailability | id, kind, period, reason, status |
+| Техническая работа | repair | id, work_kind, period, result |
 
-## Преобразование связей
+M:N раскрыты таблицами user_role(user_id,role_code) и type_capability(type_id,capability_id). Итого 15 таблиц, 24 FK. Все поля и ключи из фактического экспорта PostgreSQL показаны в DATA_DICTIONARY.md.
 
-- Пользователь ↔ Роль M:N раскрывается `user_role(user_id, role_code)` с составным PK.
-- Тип ↔ Функция M:N раскрывается `type_capability(type_id, capability_id)` с составным PK.
-- Остальные связи реализуются FK. UNIQUE на `use_session.booking_id` и `unavailability.fault_report_id` обеспечивает максимумы 1:1.
-- Необязательность уточняется NULL: будущая бронь не имеет сеанса; отклонённое сообщение не имеет технического события; ТО не связано с сообщением. Согласованные максимальные кратности сохраняются.
-- Авторы выдачи допуска и завершения события уточняют роли участников на физическом уровне.
-
-## Почему 17 таблиц при 13 сущностях
-
-13 предметных + 2 связующие M:N + 2 служебных журнала = 17 таблиц. `audit_event` сохраняет историю изменений, `conflict_event` — неудачные попытки для статистики первого этапа. Это вспомогательные структуры реализации, а не дополнительные согласованные предметные сущности. Они описаны в словаре данных; на основной даталогической диаграмме сохранена расстановка согласованных сущностей без служебных журналов.
-
-SQL-имена `unavailability`, `alternative`, `repair` сохранены для совместимости существующих функций и базы на Helios. Русские названия в модели не требуют буквального совпадения с английскими идентификаторами.
-
-`repair.work_kind` добавлен по согласованной модели. При завершении события функция сохраняет `maintenance` (обслуживание) либо `repair` (ремонт); произвольная непустая классификация допустима на уровне таблицы. Ранее установленная версия на Helios этого поля не имела; для неё подготовлена и 27.10.2026 применена отдельная миграция без удаления данных. Результаты — `approved-helios-remote/summary.json`.
+Общий аудит и журнал отказов удалены из реализации по указанию пользователя 09.11.2026. Таблица установки также удалена: метаданные версии перенесены в комментарий PostgreSQL к lr_app_user. Поэтому на Helios имеется ровно 15 таблиц с префиксом lr_. Старые журналы сохраняются перед миграцией в отдельном резервном архиве вне Git; строки 15 таблиц модели при миграции не меняются.

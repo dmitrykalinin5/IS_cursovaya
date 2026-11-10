@@ -166,13 +166,13 @@
 
 Ограничения:
 
-- `booking_user_id_not_null`: `NOT NULL user_id`.
-- `booking_equipment_id_not_null`: `NOT NULL equipment_id`.
-- `booking_capability_id_not_null`: `NOT NULL capability_id`.
 - `booking_period_check`: `CHECK ((NOT upper_inf((period)::tstzrange)))`.
 - `booking_status_check`: `CHECK ((status = ANY (ARRAY['confirmed'::text, 'needs_transfer'::text, 'cancelled'::text, 'completed'::text])))`.
 - `ck_booking_cancel`: `CHECK (((status = 'cancelled'::text) = ((cancelled_at IS NOT NULL) AND (cancel_reason IS NOT NULL))))`.
 - `booking_id_not_null`: `NOT NULL id`.
+- `booking_user_id_not_null`: `NOT NULL user_id`.
+- `booking_equipment_id_not_null`: `NOT NULL equipment_id`.
+- `booking_capability_id_not_null`: `NOT NULL capability_id`.
 - `booking_period_not_null`: `NOT NULL period`.
 - `booking_purpose_not_null`: `NOT NULL purpose`.
 - `booking_status_not_null`: `NOT NULL status`.
@@ -342,52 +342,3 @@
 - `notification_pkey`: `PRIMARY KEY (id)`.
 - `notification_user_id_fkey`: `FOREIGN KEY (user_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
 - `notification_booking_id_fkey`: `FOREIGN KEY (booking_id) REFERENCES labreserve.booking(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
-
-## `audit_event` — Служебный журнал значимых изменений (вне инфологической модели)
-
-| Столбец | Тип | NULL | Значение по умолчанию |
-|---|---|---|---|
-| `id` | `bigint` | NO | `IDENTITY` |
-| `actor_id` | `bigint` | YES | `—` |
-| `table_name` | `text` | NO | `—` |
-| `record_key` | `jsonb` | NO | `—` |
-| `action` | `text` | NO | `—` |
-| `old_data` | `jsonb` | YES | `—` |
-| `new_data` | `jsonb` | YES | `—` |
-| `occurred_at` | `timestamptz` | NO | `clock_timestamp()` |
-| `transaction_id` | `bigint` | NO | `txid_current()` |
-
-Ограничения:
-
-- `audit_event_id_not_null`: `NOT NULL id`.
-- `audit_event_table_name_not_null`: `NOT NULL table_name`.
-- `audit_event_record_key_not_null`: `NOT NULL record_key`.
-- `audit_event_action_not_null`: `NOT NULL action`.
-- `audit_event_occurred_at_not_null`: `NOT NULL occurred_at`.
-- `audit_event_transaction_id_not_null`: `NOT NULL transaction_id`.
-- `audit_event_pkey`: `PRIMARY KEY (id)`.
-- `audit_event_actor_id_fkey`: `FOREIGN KEY (actor_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
-
-## `conflict_event` — Служебный журнал отказов для статистики (вне инфологической модели)
-
-| Столбец | Тип | NULL | Значение по умолчанию |
-|---|---|---|---|
-| `id` | `bigint` | NO | `IDENTITY` |
-| `user_id` | `bigint` | NO | `—` |
-| `equipment_id` | `bigint` | NO | `—` |
-| `requested_period` | `time_window` | NO | `—` |
-| `error_code` | `text` | NO | `—` |
-| `occurred_at` | `timestamptz` | NO | `clock_timestamp()` |
-
-Ограничения:
-
-- `conflict_event_requested_period_check`: `CHECK ((NOT upper_inf((requested_period)::tstzrange)))`.
-- `conflict_event_id_not_null`: `NOT NULL id`.
-- `conflict_event_user_id_not_null`: `NOT NULL user_id`.
-- `conflict_event_equipment_id_not_null`: `NOT NULL equipment_id`.
-- `conflict_event_requested_period_not_null`: `NOT NULL requested_period`.
-- `conflict_event_error_code_not_null`: `NOT NULL error_code`.
-- `conflict_event_occurred_at_not_null`: `NOT NULL occurred_at`.
-- `conflict_event_pkey`: `PRIMARY KEY (id)`.
-- `conflict_event_user_id_fkey`: `FOREIGN KEY (user_id) REFERENCES labreserve.app_user(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.
-- `conflict_event_equipment_id_fkey`: `FOREIGN KEY (equipment_id) REFERENCES labreserve.equipment(id) ON UPDATE RESTRICT ON DELETE RESTRICT`.

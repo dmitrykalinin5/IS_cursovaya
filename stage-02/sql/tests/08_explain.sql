@@ -22,8 +22,9 @@ EXPLAIN (ANALYZE,BUFFERS) SELECT e.id FROM equipment e JOIN type_capability c ON
 \echo Q4 admission coverage (small relation may favor sequential scan)
 EXPLAIN (ANALYZE,BUFFERS) SELECT id FROM admission WHERE user_id=1 AND type_id=1 AND revoked_at IS NULL
  AND valid_during @> tstzrange(now()+interval '1 day',now()+interval '2 days');
-\echo Q5 audit history
-EXPLAIN (ANALYZE,BUFFERS) SELECT id FROM audit_event WHERE table_name='booking' AND record_key->>'id'='1' ORDER BY occurred_at DESC LIMIT 20;
+\echo Q5 technical work history
+EXPLAIN (ANALYZE,BUFFERS) SELECT id FROM repair
+ WHERE unavailability_id=1 ORDER BY lower(period) DESC LIMIT 20;
 \echo Q1 comparison without secondary query index (EXCLUDE still exists)
 DROP INDEX ix_booking_equipment_period;
 EXPLAIN (ANALYZE,BUFFERS) SELECT id FROM booking WHERE equipment_id=(SELECT id FROM equipment WHERE inventory_no='BENCH-500')
