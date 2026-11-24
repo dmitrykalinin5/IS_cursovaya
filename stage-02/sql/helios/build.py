@@ -59,13 +59,15 @@ def triggers(gist):
     text = SOURCES[FILES[1]]
     text = once(text, 'SET search_path=labreserve,public;\n', '')
     if not gist:
-        text = once(text, " IF NEW.status='confirmed' THEN", """ IF NEW.status='confirmed' THEN
+        text = once(text, "\n END IF;\n IF NEW.status='completed'", """
   -- VOLATILE trigger: fresh RC snapshot AFTER lock_equipment's UPDATE.
   IF EXISTS(SELECT 1 FROM booking b WHERE b.equipment_id=NEW.equipment_id
      AND b.status='confirmed' AND b.id IS DISTINCT FROM NEW.id
      AND b.period && NEW.period::tstzrange) THEN
    RAISE EXCEPTION 'Conflicting confirmed booking' USING ERRCODE='23P01';
-  END IF;""")
+  END IF;
+ END IF;
+ IF NEW.status='completed'""")
     return adapt(text)
 
 
@@ -77,7 +79,7 @@ def operations():
     text = text[:start]
     signatures = re.findall(r'CREATE FUNCTION (\w+)\((.*?)\)\s*RETURNS', text, re.S)
     signatures += re.findall(r'CREATE FUNCTION (\w+)\((.*?)\)\s*RETURNS', SOURCES[FILES[1]], re.S)
-    definers = {'create_booking', 'request_booking', 'cancel_booking', 'select_alternative',
+    definers = {'create_booking', 'request_booking', 'request_booking_with_alternatives', 'cancel_booking', 'select_alternative',
                 'report_fault', 'register_unavailability', 'edit_maintenance',
                 'resolve_unavailability', 'open_session', 'close_session',
                 'offer_alternatives', 'create_reminders', 'grant_admission', 'revoke_admission'}
@@ -102,13 +104,29 @@ def indexes(gist):
     return adapt(text)
 
 
+def replace_booking_guard(gist):
+    definition = re.search(r'CREATE FUNCTION lr_check_booking\(\).*?\nEND \$\$;', triggers(gist), re.S)
+    if definition is None:
+        raise ValueError('Cannot locate lr_check_booking in generated SQL')
+    return (definition.group().replace('CREATE FUNCTION', 'CREATE OR REPLACE FUNCTION', 1) + '\n'
+            'ALTER FUNCTION s466088.lr_check_booking() SET search_path=s466088,pg_catalog,pg_temp;\n')
+
+
 def build(destination):
     destination.mkdir(parents=True, exist_ok=True)
     digest = hashlib.sha256(Path(__file__).read_bytes() + b''.join(v.encode() for v in SOURCES.values())
                             + b''.join(p.read_bytes() for p in [Path(__file__).parent / n for n in ['preflight.sql', 'install.sql', 'smoke_tests.sql', 'fingerprint.sql', 'manifest.sql']])).hexdigest()
+    ops = operations()
     for mode in ['gist', 'trigger']:
         use_gist = mode == 'gist'
-        (destination / f'{mode}.sql').write_text(schema(use_gist) + triggers(use_gist) + operations() + indexes(use_gist))
+        (destination / f'{mode}.sql').write_text(schema(use_gist) + triggers(use_gist) + ops + indexes(use_gist))
+        (destination / f'booking-guard-{mode}.sql').write_text(replace_booking_guard(use_gist))
+    request = re.search(r'CREATE FUNCTION lr_request_booking_with_alternatives\(.*?\nEND \$\$;', ops, re.S)
+    if request is None:
+        raise ValueError('Cannot locate lr_request_booking_with_alternatives in generated SQL')
+    security = [line for line in ops.splitlines()
+                if ' FUNCTION s466088.lr_request_booking_with_alternatives(' in line]
+    (destination / 'booking-request.sql').write_text(request.group() + '\n' + '\n'.join(security) + '\n')
     seed = SOURCES[FILES[4]]
     seed = once(seed, '\\set ON_ERROR_STOP on\nBEGIN;\nSET search_path=labreserve,public;\n', '')
     seed = once(seed, 'COMMIT;\n', '')
@@ -117,7 +135,7 @@ def build(destination):
     tests = (ROOT / 'sql/tests/06_assertions.sql').read_text().split('CREATE ROLE labreserve_stage02_probe')[0]
     tests = tests.replace("table_schema='labreserve' AND table_type='BASE TABLE'", "table_schema='labreserve' AND table_type='BASE TABLE' AND table_name LIKE 'lr\\_%' ESCAPE '\\'")
     (destination / 'assertions.sql').write_text(adapt(tests) + 'ROLLBACK;\n')
-    for name in ['preflight.sql', 'install.sql', 'smoke_tests.sql', 'fingerprint.sql', 'manifest.sql']:
+    for name in ['preflight.sql', 'install.sql', 'smoke_tests.sql', 'fingerprint.sql', 'manifest.sql', 'upgrade_booking_request.sql']:
         (destination / name).write_text((Path(__file__).parent / name).read_text())
     (destination / 'version.sql').write_text(f"\\set source_hash {digest}\n")
     print('Built Helios bundle:', destination, 'source', digest)

@@ -2,7 +2,7 @@
 
 | UC/FR/BR | Объект/ограничение | Функция/триггер | Проверка и граница покрытия |
 |---|---|---|---|
-| UC-01 | booking, admission, alternative, use_session | create/select/open/close | T01–11,16–19,30–34,44,52–53; C01,C04 |
+| UC-01 | booking, admission, alternative, use_session | request_booking_with_alternatives (шаги 3–5); select/open/close | T01–11,16–19,30–34,44,52–53,61–65; C01,C04 |
 | UC-02 | unavailability, fault_report, repair, notification | register/edit/resolve; impact | T12–29; C02,C03,C05 |
 | UC-03 | catalogue, admission, booking, use_session | grant/revoke; metrics | T35–40,45–50,56; Q3–Q5 |
 | FR-01 | app_user, user_role | assert_owner, require_staff | T11,25,45,58–60; аутентификация — этап 3 |

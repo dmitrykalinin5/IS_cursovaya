@@ -26,8 +26,8 @@ DECLARE u bigint; staff bigint; typ bigint; cap bigint; e bigint; e2 bigint;
 BEGIN
  PERFORM pg_temp.ok((SELECT count(*)=15 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
   WHERE n.nspname='s466088' AND c.relkind='r' AND c.relname LIKE 'lr\_%' ESCAPE '\'),'H01 15 tables');
- PERFORM pg_temp.ok((SELECT count(*)=31 AND bool_and('search_path=s466088, pg_catalog, pg_temp'=ANY(p.proconfig))
-  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='s466088' AND p.proname LIKE 'lr\_%' ESCAPE '\'),'H02 31 functions / fixed search_path');
+ PERFORM pg_temp.ok((SELECT count(*)=32 AND bool_and('search_path=s466088, pg_catalog, pg_temp'=ANY(p.proconfig))
+  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='s466088' AND p.proname LIKE 'lr\_%' ESCAPE '\'),'H02 32 functions / fixed search_path');
  PERFORM pg_temp.ok((SELECT count(*)=24 AND bool_and(convalidated) FROM pg_constraint c JOIN pg_namespace n ON n.oid=c.connamespace
   WHERE n.nspname='s466088' AND c.contype='f' AND c.conname LIKE 'lr\_%' ESCAPE '\'),'H03 24 validated FK');
  PERFORM pg_temp.ok((SELECT count(*)=10 AND bool_and(t.tgenabled='O') FROM pg_trigger t JOIN pg_class c ON c.oid=t.tgrelid

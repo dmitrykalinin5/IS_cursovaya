@@ -7,6 +7,6 @@ SELECT format('GRANT EXECUTE ON FUNCTION %s TO %I',p.oid::regprocedure,:'app_rol
  FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
  WHERE n.nspname='labreserve' AND p.proname IN
  ('free_intervals','equivalent_equipment','find_alternatives','equipment_state','equipment_metrics',
- 'create_booking','request_booking','cancel_booking','select_alternative','report_fault',
+ 'create_booking','request_booking','request_booking_with_alternatives','cancel_booking','select_alternative','report_fault',
  'register_unavailability','edit_maintenance','resolve_unavailability','open_session','close_session',
  'offer_alternatives','create_reminders','grant_admission','revoke_admission') \gexec

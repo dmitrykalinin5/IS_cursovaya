@@ -34,9 +34,9 @@ class AdapterTest(unittest.TestCase):
         for mode in [True, False]:
             text = build.schema(mode) + build.triggers(mode) + build.operations() + build.indexes(mode)
             self.assertEqual(text.count('CREATE TABLE lr_'), 15)
-            self.assertEqual(text.count('CREATE FUNCTION lr_'), 31)
+            self.assertEqual(text.count('CREATE FUNCTION lr_'), 32)
             self.assertEqual(text.count('CREATE TRIGGER lr_'), 10)
-            self.assertEqual(text.count('SET search_path=s466088,pg_catalog,pg_temp;'), 31)
+            self.assertEqual(text.count('SET search_path=s466088,pg_catalog,pg_temp;'), 32)
             for forbidden in ['CREATE SCHEMA', 'CREATE EXTENSION', 'ON ALL TABLES', 'ON ALL FUNCTIONS', 'REVOKE ALL ON SCHEMA']:
                 self.assertNotIn(forbidden, text)
             if mode:

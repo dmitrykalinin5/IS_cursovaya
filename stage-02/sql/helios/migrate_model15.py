@@ -38,6 +38,12 @@ LOCK TABLE lr_app_user,lr_user_role,lr_equipment_type,lr_capability,lr_type_capa
  lr_repair,lr_use_session,lr_notification IN ACCESS EXCLUSIVE MODE;
 DROP_AUDIT_TRIGGERS
 DROP FUNCTION lr_equipment_metrics(tstzrange);
+SELECT :'old_mode'='gist' AS old_uses_gist \gset
+\if :old_uses_gist
+\ir booking-guard-gist.sql
+\else
+\ir booking-guard-trigger.sql
+\endif
 OPERATIONS
 DROP TABLE lr_audit_event;
 DROP TABLE lr_conflict_event;

@@ -105,6 +105,29 @@ BEGIN
  PERFORM pg_temp.ok((SELECT extract(epoch FROM ended_at-started_at)<3600 FROM use_session WHERE id=s),'T57 actual duration differs from planned hour');
 
 END $$;
+DO $$
+DECLARE slot_start timestamptz:=date_trunc('day',now())+interval '20 days';
+ slot_end timestamptz:=slot_start+interval '1 hour'; r record;
+BEGIN
+ SELECT * INTO r FROM request_booking_with_alternatives(1,2,1,slot_start,slot_end,'UC-01 available');
+ PERFORM pg_temp.ok(r.error_code IS NULL AND r.alternatives='[]'::jsonb
+  AND (SELECT status='confirmed' FROM booking WHERE id=r.booking_id),'T61 UC-01 available slot creates booking');
+ SELECT * INTO r FROM request_booking_with_alternatives(1,2,1,slot_start,slot_end,'UC-01 occupied');
+ PERFORM pg_temp.ok(r.booking_id IS NULL AND r.error_code='23P01'
+  AND jsonb_array_length(r.alternatives)>0
+  AND NOT EXISTS (SELECT 1 FROM booking WHERE purpose='UC-01 occupied'),
+  'T62 UC-01 occupied slot returns alternatives without booking');
+ PERFORM register_unavailability(3,2,'maintenance',slot_end,slot_end+interval '1 hour','UC-01 maintenance');
+ SELECT * INTO r FROM request_booking_with_alternatives(1,2,1,slot_end,slot_end+interval '1 hour','UC-01 blocked');
+ PERFORM pg_temp.ok(r.booking_id IS NULL AND r.error_code='23514'
+  AND jsonb_array_length(r.alternatives)>0,'T63 UC-01 maintenance returns alternatives');
+ SELECT * INTO r FROM request_booking_with_alternatives(4,2,1,slot_start,slot_end,'UC-01 no admission');
+ PERFORM pg_temp.ok(r.booking_id IS NULL AND r.error_code='23514'
+  AND r.alternatives='[]'::jsonb,'T64 UC-01 occupied slot does not hide missing admission');
+ SELECT * INTO r FROM request_booking_with_alternatives(1,2,1,slot_end,slot_start,'UC-01 invalid');
+ PERFORM pg_temp.ok(r.booking_id IS NULL AND r.error_code='22023'
+  AND r.alternatives='[]'::jsonb,'T65 UC-01 invalid window returns no alternatives');
+END $$;
 CREATE ROLE labreserve_stage02_probe NOLOGIN;
 \set app_role labreserve_stage02_probe
 \ir ../scripts/grant_application.sql

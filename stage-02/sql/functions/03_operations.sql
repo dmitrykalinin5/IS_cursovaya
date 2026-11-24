@@ -96,6 +96,32 @@ BEGIN
  END;
  RETURN NEXT;
 END $$;
+CREATE FUNCTION request_booking_with_alternatives(p_user bigint,p_equipment bigint,p_capability bigint,
+ p_start timestamptz,p_end timestamptz,p_purpose text)
+RETURNS TABLE(booking_id bigint,error_code text,alternatives jsonb) LANGUAGE plpgsql AS $$
+DECLARE failed_rule text;
+BEGIN
+ alternatives:='[]'::jsonb;
+ IF p_start IS NULL OR p_end IS NULL OR NOT isfinite(p_start) OR NOT isfinite(p_end)
+    OR p_start>=p_end OR p_purpose IS NULL THEN
+  error_code:='22023';
+  RETURN NEXT;
+  RETURN;
+ END IF;
+
+ BEGIN
+  booking_id:=create_booking(p_user,p_equipment,p_capability,p_start,p_end,p_purpose);
+ EXCEPTION WHEN exclusion_violation OR check_violation THEN
+  GET STACKED DIAGNOSTICS error_code=RETURNED_SQLSTATE, failed_rule=CONSTRAINT_NAME;
+ END;
+
+ IF error_code='23P01' OR failed_rule='booking_technical_overlap' THEN
+  SELECT COALESCE(jsonb_agg(to_jsonb(a) ORDER BY a.priority,lower(a.period),a.equipment_id),'[]'::jsonb)
+  INTO alternatives
+  FROM find_alternatives(p_user,p_equipment,p_capability,tstzrange(p_start,p_end,'[)')) a;
+ END IF;
+ RETURN NEXT;
+END $$;
 CREATE FUNCTION cancel_booking(p_actor bigint,p_booking bigint,p_reason text)
 RETURNS void LANGUAGE plpgsql AS $$
 DECLARE b booking;
@@ -253,7 +279,7 @@ END $$;
 DO $$ DECLARE f record; BEGIN
  FOR f IN SELECT p.oid::regprocedure AS signature,p.proname FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace WHERE n.nspname='labreserve' LOOP
   EXECUTE format('ALTER FUNCTION %s SET search_path = labreserve, pg_catalog, pg_temp',f.signature);
-  IF f.proname IN ('create_booking','request_booking','cancel_booking','select_alternative',
+  IF f.proname IN ('create_booking','request_booking','request_booking_with_alternatives','cancel_booking','select_alternative',
     'report_fault','register_unavailability','edit_maintenance','resolve_unavailability',
     'open_session','close_session','offer_alternatives','create_reminders','grant_admission','revoke_admission') THEN
    EXECUTE format('ALTER FUNCTION %s SECURITY DEFINER',f.signature);

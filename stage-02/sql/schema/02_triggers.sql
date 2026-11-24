@@ -47,7 +47,8 @@ BEGIN
   IF NOT FOUND THEN RAISE EXCEPTION 'No admission covering entire interval' USING ERRCODE='23514'; END IF;
   IF EXISTS(SELECT 1 FROM unavailability WHERE equipment_id=NEW.equipment_id
     AND status<>'cancelled' AND period && NEW.period::tstzrange) THEN
-   RAISE EXCEPTION 'Maintenance or fault overlap' USING ERRCODE='23514'; END IF;
+   RAISE EXCEPTION 'Maintenance or fault overlap'
+    USING ERRCODE='23514', CONSTRAINT='booking_technical_overlap'; END IF;
  END IF;
  IF NEW.status='completed' AND NOT EXISTS(SELECT 1 FROM use_session
      WHERE booking_id=NEW.id AND ended_at IS NOT NULL) THEN
