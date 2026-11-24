@@ -52,6 +52,15 @@
 \item Гарантии: Ожидаемый отказ возвращается вызывающему коду; отдельный журнал не создаётся.
 \item Трассировка: UC-01; FR-08; T38.
 \end{itemize}
+\subsection{request\_\allowbreak{}booking\_\allowbreak{}with\_\allowbreak{}alternatives}
+Проверяет исходный слот, создаёт бронь или подбирает допустимую замену.
+\begin{itemize}
+\item Вход: p\_\allowbreak{}user bigint,p\_\allowbreak{}equipment bigint,p\_\allowbreak{}capability bigint,  p\_\allowbreak{}start timestamptz,p\_\allowbreak{}end timestamptz,p\_\allowbreak{}purpose text.
+\item Выход: booking\_\allowbreak{}id, error\_\allowbreak{}code, alternatives (JSONB).
+\item Ошибки: 23P01 при пересечении броней, 23514 при нарушении бизнес-правила, 22023 при некорректных параметрах.
+\item Гарантии: До 12 вариантов при конфликте расписания. Варианты не резервируют время.
+\item Трассировка: UC-01, шаги 3–5; T61–65.
+\end{itemize}
 \subsection{cancel\_\allowbreak{}booking}
 Владелец либо администратор отменяет будущую активную бронь с причиной.
 \begin{itemize}

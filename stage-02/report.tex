@@ -140,7 +140,7 @@ FR-24 и накопление статистики отклонённых зап
 охватывает плановое и фактическое использование и технические простои.
 
 \subsection{Матрица трассируемости}
-В каждой строке указаны объекты схемы, операция и проверка. T01--T60 ---
+В каждой строке указаны объекты схемы, операция и проверка. T01--T65 ---
 утверждающие SQL-тесты; C01--C05 --- конкурентные сценарии; Q1--Q5 --- планы
 запросов.
 \input{docs/traceability.tex}
@@ -234,7 +234,7 @@ $[start,end)$; соседние интервалы допустимы. Доме�
 \code{10:00+03} и \code{07:00Z} обозначают одинаковое время.
 Все 24 FK используют RESTRICT при удалении и обновлении. Идентификаторы
 неизменяемы; история сохраняется через архивирование, отзыв, отмену или закрытие.
-Полный словарь полей и ограничений приведён в приложении А.
+Полный словарь полей и ограничений приведён в \code{docs/DATA_DICTIONARY.md}.
 
 \clearpage
 \includepdf[pages=-,fitpaper=true,pagecommand={\thispagestyle{empty}\begin{tikzpicture}[remember picture,overlay]\node[anchor=south] at ([yshift=5mm]current page.south){\thepage};\end{tikzpicture}}]{diagrams/logical.pdf}
@@ -339,7 +339,7 @@ CSV формируется \code{export_report.sql}; \code{export_model.sql} ч�
 
 \section{Критические функции PostgreSQL}
 
-Внешний SQL API включает \textbf{19 функций}; ещё 12 функций обеспечивают
+Внешний SQL API включает \textbf{20 функций}; ещё 12 функций обеспечивают
 внутренние проверки и триггерные обработчики. Читающие операции используют SQL
 либо STABLE PL/pgSQL; изменяющие критические операции --- PL/pgSQL.
 Отдельные процедуры не требуются: возврат идентификатора/результата функции удобен
@@ -347,7 +347,19 @@ CSV формируется \code{export_report.sql}; \code{export_model.sql} ч�
 
 Общие ошибки: P0002 --- объект не найден; 23503 --- неверный FK;
 23514 --- бизнес-ограничение; 23P01 --- конфликт брони; 42501 --- нет полномочий.
-40001/40P01 требуют повтора всей транзакции. Остальные ошибки не маскируются.
+40001/40P01 требуют повтора всей транзакции.
+
+Шаги 3--5 UC-01 объединены в \code{request_booking_with_alternatives}.
+Функция пытается создать бронь через \code{create_booking}; триггер при
+вставке проверяет допуск, поддержку запрошенной функции и доступность
+оборудования. При успехе возвращается идентификатор подтверждённой брони.
+При пересечении с бронью, ТО или неисправностью вложенный блок откатывает
+попытку вставки, после чего \code{find_alternatives} подбирает до 12 вариантов
+той же длительности с учётом допусков. Если запрос отклонён по другой причине,
+например из-за отсутствия допуска, список остаётся пустым. Возвращённые варианты
+не занимают время в расписании. Пользователь может отправить новый запрос
+на выбранный слот, и база проверит его при создании брони.
+
 Контракты параметров, результата, ошибок и покрытия перечислены ниже.
 \input{docs/functions.tex}
 
@@ -372,7 +384,7 @@ CSV формируется \code{export_report.sql}; \code{export_model.sql} ч�
 
 \begin{center}\small
 \begin{tabularx}{\textwidth}{p{.1\textwidth}Xr}
-\toprule Запрос & План прогона 10.11.2026 & Время, мс \\
+\toprule Запрос & План выполнения & Время, мс \\
 \midrule
 Q1 & Index Scan ex\_booking\_overlap & 0.077 \\
 Q2 & Index Scan ix\_booking\_user\_future & 0.037 \\
@@ -395,7 +407,7 @@ Unix-сокет в отдельном каталоге /tmp, порт 55439, TCP
 \code{labreserve_stage02_test}. Полный runner успешно выполнил создание,
 загрузку, проверки, планы, очистку учебной схемы и повторное создание с нуля.
 
-10.11.2026 выполнено \textbf{60 из 60 основных SQL-утверждений},
+Выполнено \textbf{60 из 60 основных SQL-утверждений},
 \textbf{4 из 4 проверок согласованной модели} и \textbf{5 из 5 конкурентных сценариев}.
 Отклонения проверены по SQLSTATE. SQL-тесты и роль NOLOGIN откатываются.
 Все 83 атрибута XML сверены с PostgreSQL по имени, типу, PK/FK и NULL.
@@ -430,6 +442,19 @@ Python-скрипт использует стандартную библиоте
 посторонних отношений. Повтор миграции и установки прошёл без повторного seed.
 Результаты сохранены в \code{docs/model15-helios-results.json};
 команды демонстрации --- в \code{docs/DEFENSE.md}.
+
+\subsection{Проверка запроса бронирования по UC-01}
+24.11.2026 в локальной копии Helios прошли пять проверок T61--T65.
+Свободный слот дал подтверждённую бронь (T61). Занятый слот и период ТО
+вернули альтернативы (T62, T63). Запрос без допуска к занятому аппарату и
+запрос с обратным интервалом вернули отказ с пустым списком (T64, T65).
+Проверки прошли на свежей схеме и после обновления предыдущей версии.
+
+В тот же день обновление применено на Helios. Первый вызов функции
+создал подтверждённую бронь на \code{FDM-002}, повтор того же запроса вернул
+код \code{23P01} и 12 альтернатив. После \code{ROLLBACK} тестовая бронь
+отсутствовала. Команды обновления и демонстрации приведены в
+\code{docs/HELIOS_DEPLOY.md} и \code{docs/FUNCTIONS.md}.
 
 \subsection{Воспроизводимость проверки}
 Установка схемы, загрузка демонстрационных данных и проверки выполняются
@@ -468,100 +493,9 @@ Python-скрипт использует стандартную библиоте
 
 Созданы ER- и даталогическая модели, PostgreSQL-схема из 15 таблиц,
 SQL API критических операций, индексы и проверочный комплект.
-Все 60 основных и четыре дополнительных SQL-утверждения, а также пять
-конкурентных сценариев прошли.
+Прошли базовый набор SQL-проверок и конкурентные сценарии. Обе ветки
+запроса бронирования UC-01 проверены на Helios.
 Материалы пригодны для демонстрации второго этапа и последующей интеграции
 через JPA/Hibernate.
 
-\clearpage
-\appendix
-\section{Полный словарь таблиц, ключей и ограничений}
-\label{app:dictionary}
-Все поля, обязательность, default и определения ограничений ниже получены из
-реально установленной PostgreSQL-схемы. FK везде используют RESTRICT при
-удалении и обновлении. На диаграммах показан базовый тип tstzrange; в DDL
-использован проверяемый домен time\_window. Первичные ключи IDENTITY генерируются
-СУБД. Индексы описаны в основном разделе и отдельном SQL-файле.
-\begingroup\small\setstretch{1.1}
-\input{docs/dictionary.tex}
-\endgroup
-
-\clearpage
-\section{Примеры исполняемого SQL}
-\subsection{Защита подтверждённых интервалов}
-Фрагмент определения таблицы booking; остальные столбцы и ограничения находятся
-в \code{sql/schema/01_tables.sql}.
-\noindent\begin{minipage}{\linewidth}
-\begin{Verbatim}[fontsize=\small,breaklines=true]
-CONSTRAINT ex_booking_overlap EXCLUDE USING gist
- (equipment_id WITH =, (period::tstzrange) WITH &&)
- WHERE (status='confirmed')
-\end{Verbatim}
-\end{minipage}
-
-\subsection{Общий ресурс сериализации}
-Обновление строки необходимо для отказа на устаревшем снимке более строгой
-изоляции; простое чтение или предварительный SELECT не заменяет эту операцию.
-\noindent\begin{minipage}{\linewidth}
-\begin{Verbatim}[fontsize=\small,breaklines=true]
-CREATE FUNCTION lock_equipment(p_id bigint)
-RETURNS void LANGUAGE plpgsql AS $$
-BEGIN
- UPDATE equipment
- SET schedule_revision=schedule_revision+1 WHERE id=p_id;
- IF NOT FOUND THEN
-  RAISE EXCEPTION 'Unknown equipment' USING ERRCODE='23503';
- END IF;
-END $$;
-\end{Verbatim}
-\end{minipage}
-
-\subsection{Воспроизводимый запуск}
-Из каталога этапа, после запуска отдельного локального PostgreSQL:
-\noindent\begin{minipage}{\linewidth}
-\begin{Verbatim}[fontsize=\small,breaklines=true]
-export PGHOST=/tmp PGPORT=55432
-psql -d postgres -f sql/scripts/create_database.sql
-export PGDATABASE=labreserve_stage02_test
-bash sql/scripts/run_checks.sh
-psql -X -f sql/scripts/export_report.sql > output/analytics.csv
-\end{Verbatim}
-\end{minipage}
-
-\subsection{Пример вызова следующего этапа}
-Параметры native JPA-запроса связываются отдельно, без конкатенации SQL.
-Сервер передаёт идентичность аутентифицированного пользователя и выполняет COMMIT
-при успехе либо ROLLBACK при исключении.
-\noindent\begin{minipage}{\linewidth}
-\begin{Verbatim}[fontsize=\small,breaklines=true]
-SELECT labreserve.create_booking(
- :user_id, :equipment_id, :capability_id,
- :start_at, :end_at, :purpose);
-SELECT labreserve.select_alternative(:actor_id, :alternative_id);
-SELECT * FROM labreserve.equipment_metrics(:report_window);
-\end{Verbatim}
-\end{minipage}
-
-\section{Источники и состав электронного приложения}
-\begin{enumerate}
-\item Официальное задание: «Информационные системы. Курсовая работа»,
-кафедра ВТ, копия в stage-01, раздел «Этап 2».
-\item Утверждённый отчёт первого этапа \systemname, stage-01/report\_approved.pdf,
-BR-1--BR-10, FR-01--FR-24 и UC-01--UC-03.
-\item PostgreSQL 18. Ограничения:
-\url{https://www.postgresql.org/docs/18/ddl-constraints.html}.
-\item PostgreSQL 18. Типы диапазонов:
-\url{https://www.postgresql.org/docs/18/rangetypes.html}.
-\item PostgreSQL 18. Изоляция транзакций:
-\url{https://www.postgresql.org/docs/18/transaction-iso.html}.
-\item PostgreSQL 18. btree\_gist:
-\url{https://www.postgresql.org/docs/18/btree-gist.html}.
-\end{enumerate}
-
-Электронное приложение в stage-02 содержит SQL всех таблиц, триггеров, операций
-и индексов, seed, проверки, скрипты установки/удаления, редактируемые диаграммы,
-JSON фактической схемы, контракты и матрицу трассировки. Назначение файлов и
-команды запуска приведены в README.md. Журналы и растровые страницы сборки
-размещены в output и исключены из Git; отобранные результаты проверок сохранены
-в docs. Первый этап не изменялся.
 \end{document}
